@@ -37,6 +37,11 @@ def ESPN_features(row):
   red_strikes_per_minute = red_total_strikes/row['total_fight_time']
   blue_strikes_per_minute = blue_total_strikes_landed/row['total_fight_time']
 
+
+  # striking ratio
+  red_total_striking_ratio = Calculate_Percentage(red_total_strikes_landed, blue_total_strikes_landed)
+  blue_total_striking_ratio = Calculate_Percentage(blue_total_strikes_landed, red_total_strikes_landed)
+
   # striking accuarcy
   red_striking_accuracy  = Calculate_Percentage(red_total_strikes_landed, red_total_strikes)
   blue_striking_accuracy = Calculate_Percentage(blue_total_strikes_landed, blue_total_strikes)
@@ -125,4 +130,5 @@ def ESPN_features(row):
         red_striking_defense, blue_striking_defense,
         red_avg_submissions, blue_avg_submissions,
         red_knockdowns, blue_knockdowns,
-        red_power, blue_power)
+        red_power, blue_power,
+        red_total_striking_ratio , blue_total_striking_ratio)
