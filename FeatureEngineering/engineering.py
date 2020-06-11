@@ -12,6 +12,7 @@ from FeatureEngineering.ESPNfeatures import ESPN_features
 from FeatureEngineering.skill import calculate_skill
 from FeatureEngineering.Fighter_Level_features import feature_engineering_fighter_level_loop, check_if_each_row_is_either_red_or_blue
 from FeatureEngineering.Shift_Features import Shift_all_features
+from FeatureEngineering.comparing_previous_opponents import get_stats_of_fighters_who_they_have_beaten_or_lost_to
 
 
 class Engineering:
@@ -28,6 +29,7 @@ class Engineering:
         self.create_skill_based_features()
         print('Creating Fighter Level Attributes')
         self.create_fighter_level_attributes()
+        self.GetStatsOfFightersWhoTheyHaveBeatenOrLostTo()
 
         print('Shift All Features')
         self.shift_features()
@@ -228,6 +230,28 @@ class Engineering:
 
 
 
+    def GetStatsOfFightersWhoTheyHaveBeatenOrLostTo(self):
+
+        the_features = get_stats_of_fighters_who_they_have_beaten_or_lost_to(self.Elos_and_features)
+        add_variable_to_split = check_if_each_row_is_either_red_or_blue(the_features, self.Elos_and_features)
+
+        red_attributes = add_variable_to_split[add_variable_to_split.Blue_or_Red == 'Red'].rename(columns = {
+            'Stats_of_Opponents_they_have_beaten' :'R_Stats_of_Opponents_they_have_beaten',
+            'Stats_of_Opponents_they_have_lost_to':'R_Stats_of_Opponents_they_have_lost_to'}).set_index('Index')
+
+        red_attributes.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
+
+        blue_attributes = add_variable_to_split[add_variable_to_split.Blue_or_Red == 'Blue'].rename(columns = {
+            'Stats_of_Opponents_they_have_beaten' :'B_Stats_of_Opponents_they_have_beaten',
+            'Stats_of_Opponents_they_have_lost_to':'B_Stats_of_Opponents_they_have_lost_to'}).set_index('Index')
+
+        blue_attributes.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
+
+        self.Elos_and_features = self.Elos_and_features.join(red_attributes)
+        self.Elos_and_features = self.Elos_and_features.join(blue_attributes)
+
+
+
     def shift_features(self):
         '''
         Shift features as they need to be an accumaltion of stats before fight
@@ -247,6 +271,7 @@ class Engineering:
                             'R_Average_Num_Takedowns','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
                             'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                             'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
+                            'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak',
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy',
@@ -254,7 +279,8 @@ class Engineering:
                             'B_knockdows_per_minute','B_Submission Attempts','B_Average_Num_Takedowns','B_win_by_Decision_Majority',
                             'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
                             'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
-                            'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names']]
+                            'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names',
+                            'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to']]
 
 
     def Normalize_different_wins(self):
