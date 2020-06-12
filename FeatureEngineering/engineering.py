@@ -30,6 +30,7 @@ class Engineering:
         print('Creating Fighter Level Attributes')
         self.create_fighter_level_attributes()
         self.GetStatsOfFightersWhoTheyHaveBeatenOrLostTo()
+        self.check_if_fighter_beat_anyone_who_opponent_has_lost_to()
 
         print('Shift All Features')
         self.shift_features()
@@ -259,13 +260,43 @@ class Engineering:
         self.shifted_elos_and_features = Shift_all_features(self.Elos_and_features)
 
 
+    @staticmethod
+    def check_if_fighter_has_beaten_opponent_and_who_beat_their_current_opponent(row):
+        
+        R_beaten = set(row['R_Beaten_Names'])
+        R_lost   = set(row['R_Lost_to_names'])
+
+        B_beaten = set(row['B_Beaten_Names'])
+        B_lost   = set(row['B_Lost_to_names'])
+
+        if (len(R_beaten) > 0) and (len(B_lost) > 0):
+            Red_beat = len(list(R_beaten | B_lost))
+        else:
+            Red_beat = 0
+
+        if (len(B_beaten) > 0) and (len(R_lost) > 0):
+            Blue_beat = len(list(B_beaten | R_lost))
+        else:
+            Blue_beat = 0
+
+        return Red_beat, Blue_beat
+        
+
+
+    def check_if_fighter_beat_anyone_who_opponent_has_lost_to(self):
+
+        (self.Elos_and_features['R_Beaten_Similar'], 
+        self.Elos_and_features['B_Beaten_Similar']) \
+        = zip(*self.Elos_and_features.apply(lambda x: self.check_if_fighter_has_beaten_opponent_and_who_beat_their_current_opponent(x), axis=1))
+
+
 
     def subset_features(self):
 
         self.subset = self.shifted_elos_and_features[['R_fighter','B_fighter','Average_Odds_f1', 'Average_Odds_f2','date','title_bout','win_by','weight_class',
                             'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
                             'R_Fight_Number','R_Stance', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio','R_Beaten_Names', 'R_Lost_to_names',
-                            'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts',
+                            'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts','R_Beaten_Similar',
                             'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
                             'R_Strikes_Absorbed_per_Minute','R_Striking Defense','R_knockdows_per_minute','R_Submission Attempts',
                             'R_Average_Num_Takedowns','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
@@ -273,7 +304,7 @@ class Engineering:
                             'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
                             'B_Fight_Number',
-                            'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak',
+                            'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy',
                             'B_Strikes_Per_Minute','B_Striking Accuracy','B_Log_Striking_Ratio','B_Strikes_Absorbed_per_Minute','B_Striking Defense',
                             'B_knockdows_per_minute','B_Submission Attempts','B_Average_Num_Takedowns','B_win_by_Decision_Majority',
