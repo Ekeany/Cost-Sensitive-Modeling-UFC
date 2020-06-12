@@ -112,9 +112,11 @@ def calculate_fighters_beat_and_lost(df, fighter):
     
     overall_beat = []
     overall_lost = []
+    df.reset_index(drop=True,inplace=True)
     for row_ in range(len(df)):
 
         df_slice = df.loc[:row_,:].copy()
+        df_slice = df_slice[:-1]
         beat_list = []
         lost_list = []
         for _, row in df_slice.iterrows():
@@ -123,8 +125,10 @@ def calculate_fighters_beat_and_lost(df, fighter):
 
             if len(won) > 0:
                 beat_list.append(won)
+
             elif len(lost) > 0:
                 lost_list.append(lost)
+
             else:
                 pass
 
