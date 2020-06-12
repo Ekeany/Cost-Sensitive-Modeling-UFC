@@ -46,9 +46,11 @@ def calculate_stats_of_previous_fighters_who_they_beat(df, fighter):
     
     overall_beat = []
     overall_lost = []
+    df.reset_index(drop=True,inplace=True)
     for row_ in range(len(df)):
 
         df_slice = df.loc[:row_,:].copy()
+        df_slice = df_slice[:-1]
         beat_list = []
         lost_list = []
         for _, row in df_slice.iterrows():
