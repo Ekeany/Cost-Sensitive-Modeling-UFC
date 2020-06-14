@@ -1,6 +1,48 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from sklearn.preprocessing import StandardScaler
+from PreProcessing.Imputer import Imputer
+
+
+def Impute_median(df, cols, group='weight_class'):
+
+    temp = df.copy()
+    for col in cols:
+        temp[col] = temp.groupby(group)[col].transform(lambda x: x.fillna(x.median()))
+
+    return temp
+
+def Normalize_Features(df):
+
+    df = df.copy()
+    cols = ['blue_Fighter_Odds', 'B_Takedown Accuracy',
+             'B_age', 'B_RingRust','B_Striking Defense',
+             'B_Takedown_Defense','blue_skill',  'striking_blue_skill',
+             'wrestling_blue_skill',  'B_Power_Rating',
+             'g_and_p_blue_skill', 'jiujitsu_blue_skill',
+             'B_Strikes_Absorbed_per_Minute', 'B_AVG_fight_time',
+             'red_Fighter_Odds', 'R_Takedown Accuracy',
+             'R_age', 'R_RingRust', 'R_Striking Defense',
+             'R_Takedown_Defense','red_skill',  'striking_red_skill',
+             'wrestling_red_skill',  'R_Power_Rating',
+             'g_and_p_red_skill', 'jiujitsu_red_skill',
+             'R_Strikes_Absorbed_per_Minute', 'R_AVG_fight_time']
+
+    # Drop col to merge back on
+    norm = StandardScaler().fit_transform(df[cols].values)
+    df.drop(cols, inplace=True, axis=1)
+    
+    norm_df = pd.DataFrame(norm, index=df.index, columns=cols)
+    norm_df = pd.merge(df, norm_df, left_index=True, right_index=True)
+    #imputed_norm_df = Impute_median(norm_df, cols, group='weight_class')
+    imputer = Imputer(norm_df)
+    cleaned_norm = imputer.impute('bfill')
+
+    second_imputer = Imputer(cleaned_norm)
+    cleaned_norm = second_imputer.impute_missing_values()
+    
+    return cleaned_norm
 
 
 def get_stats_of_previous_fighters_who_they_beat(df, fighter):
@@ -82,6 +124,7 @@ def get_stats_of_fighters_who_they_have_beaten_or_lost_to(df):
     fighters = []; rank_indexs  = []
     stats_beaten = []; stats_lost_to = []
     df = df.sort_values(by='date', ascending=True)
+    df = Normalize_Features(df)
     for fighter in tqdm(unique_fighters):
         
         fights = df[(df.R_fighter == fighter) | (df.B_fighter == fighter)]

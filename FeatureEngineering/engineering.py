@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from statistics import mean
 import sys
 import os
 from pathlib import Path
+from scipy.spatial import distance
 
+from PreProcessing.Imputer import Imputer
+from FeatureEngineering.ewma import EWMA
 from FeatureEngineering.ufc_elo import calculate_elos
 from FeatureEngineering.odds_utils import convert_american_odds_to_perecentage
 from FeatureEngineering.WhoWonAtGraplingStriking import wrestling, striking, ground_and_pound, JiuJitsu, grappling
@@ -12,7 +16,7 @@ from FeatureEngineering.ESPNfeatures import ESPN_features
 from FeatureEngineering.skill import calculate_skill
 from FeatureEngineering.Fighter_Level_features import feature_engineering_fighter_level_loop, check_if_each_row_is_either_red_or_blue
 from FeatureEngineering.Shift_Features import Shift_all_features
-from FeatureEngineering.comparing_previous_opponents import get_stats_of_fighters_who_they_have_beaten_or_lost_to
+from FeatureEngineering.comparing_previous_opponents import get_stats_of_fighters_who_they_have_beaten_or_lost_to, Normalize_Features
 
 
 class Engineering:
@@ -31,6 +35,7 @@ class Engineering:
         self.create_fighter_level_attributes()
         self.GetStatsOfFightersWhoTheyHaveBeatenOrLostTo()
         self.check_if_fighter_beat_anyone_who_opponent_has_lost_to()
+        self.calculate_average_distance_of_opponent_to_previous_wins_loses()
 
         print('Shift All Features')
         self.shift_features()
@@ -270,17 +275,89 @@ class Engineering:
         B_lost   = set(row['B_Lost_to_names'])
 
         if (len(R_beaten) > 0) and (len(B_lost) > 0):
-            Red_beat = len(list(R_beaten | B_lost))
+            Red_beat = len(list(R_beaten & B_lost))
         else:
             Red_beat = 0
 
         if (len(B_beaten) > 0) and (len(R_lost) > 0):
-            Blue_beat = len(list(B_beaten | R_lost))
+            Blue_beat = len(list(B_beaten & R_lost))
         else:
             Blue_beat = 0
 
         return Red_beat, Blue_beat
         
+
+    @staticmethod
+    def Average_distance_of_oppent_to_wins_and_loses(row):
+
+        blue_fighter = [row['blue_Fighter_Odds'], row['B_Takedown Accuracy'],
+                row['B_age'], row['B_RingRust'],
+                row['B_Striking Defense'], row['B_Takedown_Defense'],
+                row['blue_skill'],  row['striking_blue_skill'],
+                row['wrestling_blue_skill'],  row['B_Power_Rating'],
+                row['g_and_p_blue_skill'], row['jiujitsu_blue_skill'],
+                row['B_Strikes_Absorbed_per_Minute'], row['B_AVG_fight_time']]
+
+        red_fighter = [row['red_Fighter_Odds'], row['R_Takedown Accuracy'],
+                row['R_age'],   row['R_RingRust'],
+                row['R_Striking Defense'], row['R_Takedown_Defense'],
+                row['red_skill'],  row['striking_red_skill'],
+                row['wrestling_red_skill'],  row['R_Power_Rating'],
+                row['g_and_p_red_skill'], row['jiujitsu_red_skill'],
+                row['R_Strikes_Absorbed_per_Minute'], row['R_AVG_fight_time']]
+
+
+        if len(row['R_Stats_of_Opponents_they_have_beaten']) > 0:
+            distances = []
+            for fighter in row['R_Stats_of_Opponents_they_have_beaten']:
+                distances.append(distance.euclidean(blue_fighter, fighter))
+            
+            distance_red_beaten = EWMA(distances, 2)
+        else:
+            distance_red_beaten = 9999
+
+
+        if len(row['R_Stats_of_Opponents_they_have_lost_to']) > 0:
+            distances = []
+            for fighter in row['R_Stats_of_Opponents_they_have_lost_to']:
+                distances.append(distance.euclidean(blue_fighter, fighter))
+            
+            distance_red_lost = mean(distances)
+        else:
+            distance_red_lost = 9999
+
+
+        if len(row['B_Stats_of_Opponents_they_have_beaten']) > 0:
+            distances = []
+            for fighter in row['B_Stats_of_Opponents_they_have_beaten']:
+                distances.append(distance.euclidean(red_fighter, fighter))
+            
+            distance_blue_beaten = EWMA(distances, 2)
+        else:
+            distance_blue_beaten = 9999
+
+        if len(row['B_Stats_of_Opponents_they_have_lost_to']) > 0:
+            distances = []
+            for fighter in row['B_Stats_of_Opponents_they_have_lost_to']:
+                distances.append(distance.euclidean(red_fighter, fighter))
+            
+            distance_blue_lost = mean(distances)
+        else:
+            distance_blue_lost = 9999
+
+        return distance_red_beaten, distance_red_lost, distance_blue_beaten, distance_blue_lost
+
+
+    def calculate_average_distance_of_opponent_to_previous_wins_loses(self):
+
+        temp  = Normalize_Features(self.Elos_and_features)
+        
+        (self.Elos_and_features['R_distance_beaten'], 
+         self.Elos_and_features['R_distance_lost'], 
+         self.Elos_and_features['B_distance_beaten'],
+         self.Elos_and_features['B_distance_lost']) \
+        =  zip(*temp.apply(lambda x: self.Average_distance_of_oppent_to_wins_and_loses(x), axis=1))
+
 
 
     def check_if_fighter_beat_anyone_who_opponent_has_lost_to(self):
@@ -288,7 +365,6 @@ class Engineering:
         (self.Elos_and_features['R_Beaten_Similar'], 
         self.Elos_and_features['B_Beaten_Similar']) \
         = zip(*self.Elos_and_features.apply(lambda x: self.check_if_fighter_has_beaten_opponent_and_who_beat_their_current_opponent(x), axis=1))
-
 
 
     def subset_features(self):
