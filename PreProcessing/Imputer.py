@@ -37,10 +37,14 @@ class Imputer:
     if len(na_cols) != 0:
       print('These Columns have Missing Values' + str(na_cols))
       for col in na_cols:
-        self.impute_using_group(col, impute_type = 'median')
+        
+        # check if numeric
+        if self.df[col].dtype.kind in 'biufc':
+          self.impute_using_group(col, impute_type = 'median')
+        
+        else:pass
 
-    else:
-      pass
+    else:pass
 
     return self.df
 
@@ -54,4 +58,5 @@ class Imputer:
     mainly for takedowns as some
     fighters never engage in wrestling
     '''
-    self.df[col] = self.df[col].fillna(self.df.groupby('weight_class')[col].transform(impute_type))
+    #self.df[col] = self.df[col].fillna(self.df.groupby('weight_class')[col].transform(impute_type))
+    self.df[col] = self.df.groupby('weight_class')[col].transform(lambda x: x.fillna(x.median()))
