@@ -352,11 +352,19 @@ class Engineering:
 
         temp  = Normalize_Features(self.Elos_and_features)
         
-        (self.Elos_and_features['R_distance_beaten'], 
-         self.Elos_and_features['R_distance_lost'], 
-         self.Elos_and_features['B_distance_beaten'],
-         self.Elos_and_features['B_distance_lost']) \
+        (temp['R_distance_beaten'], 
+         temp['R_distance_lost'], 
+         temp['B_distance_beaten'],
+         temp['B_distance_lost']) \
         =  zip(*temp.apply(lambda x: self.Average_distance_of_oppent_to_wins_and_loses(x), axis=1))
+        
+        temp = self.create_a_merge_column(temp, 'R_fighter', 'B_fighter', 'date')
+
+        temp = temp[['R_distance_beaten','R_distance_lost','B_distance_beaten','B_distance_lost',
+                    'merge']].copy()
+
+        self.Elos_and_features = self.create_a_merge_column(self.Elos_and_features, 'R_fighter', 'B_fighter', 'date')
+        self.Elos_and_features = self.Elos_and_features.merge(temp, on = 'merge')
 
 
 
@@ -370,7 +378,7 @@ class Engineering:
     def subset_features(self):
 
         self.subset = self.shifted_elos_and_features[['R_fighter','B_fighter','Average_Odds_f1', 'Average_Odds_f2','date','title_bout','win_by','weight_class',
-                            'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
+                            'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner', 'R_distance_beaten', 'R_distance_lost',
                             'R_Fight_Number','R_Stance', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio','R_Beaten_Names', 'R_Lost_to_names',
                             'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts','R_Beaten_Similar',
                             'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
@@ -381,7 +389,7 @@ class Engineering:
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
-                            'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy',
+                            'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 'B_distance_beaten', 'B_distance_lost',
                             'B_Strikes_Per_Minute','B_Striking Accuracy','B_Log_Striking_Ratio','B_Strikes_Absorbed_per_Minute','B_Striking Defense',
                             'B_knockdows_per_minute','B_Submission Attempts','B_Average_Num_Takedowns','B_win_by_Decision_Majority',
                             'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
