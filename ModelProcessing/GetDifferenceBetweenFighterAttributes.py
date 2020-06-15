@@ -15,6 +15,7 @@ class GetTheDifferenceBetweenFighterAttributes:
       else:
         return col_name.replace('red_','blue_')
 
+
     @staticmethod
     def find_red_columns(all_columns):
 
@@ -27,6 +28,7 @@ class GetTheDifferenceBetweenFighterAttributes:
       
       return red_columns
 
+
     @staticmethod
     def new_column_name(col_name):
       if 'R_' in col_name:
@@ -35,27 +37,21 @@ class GetTheDifferenceBetweenFighterAttributes:
         return col_name.replace('red_','difference_')
 
 
-    @property
-    def get_difference_between_fighters_stats(self):
+    def get_difference_between_fighters_stats(self, cols_to_keep_whole):
   
-      my_copy = self.df.copy()
-      my_copy.drop(['R_fighter','B_fighter','date',
-                    'Average_Odds_f1', 'Average_Odds_f2',
-                    'win_by','weight_class','Winner',
-                    'R_win_by_Decision_Majority',
-                    'R_win_by_Decision_Split', 'R_win_by_Decision_Unanimous',
-                    'R_win_by_KO/TKO', 'R_win_by_Submission',
-                    'R_win_by_TKO_Doctor_Stoppage','B_win_by_Decision_Majority',
-                    'B_win_by_Decision_Split', 'B_win_by_Decision_Unanimous',
-                    'B_win_by_KO/TKO', 'B_win_by_Submission',
-                    'B_win_by_TKO_Doctor_Stoppage'], axis=1, inplace=True)
+      self.my_copy = self.df.copy()
+      self.my_copy.drop(cols_to_keep_whole, axis=1, inplace=True)
       
-      red_columns = self.find_red_columns(my_copy.columns)
+      red_columns = self.find_red_columns(self.my_copy.columns)
       for red_col in red_columns:
 
         blue_col = self.find_pairing_column_name(red_col)
         new_col_name = self.new_column_name(red_col)
 
-        self.df[new_col_name] = my_copy[red_col] - my_copy[blue_col]
+        self.df[new_col_name] = self.my_copy[red_col] - self.my_copy[blue_col]
 
-      return self.df
+
+
+    def drop_solo_columns(self):
+        self.df.drop(self.my_copy.columns.to_list(), axis=1, inplace=True)
+        return self.df
