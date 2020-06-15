@@ -45,7 +45,7 @@ class Imputer:
         else:pass
 
     else:pass
-
+    print('Finished Imputation')
     return self.df
 
 
