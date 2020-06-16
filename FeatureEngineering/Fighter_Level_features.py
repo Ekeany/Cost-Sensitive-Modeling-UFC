@@ -182,6 +182,7 @@ def feature_engineering_fighter_level_loop(df):
     average_num_takedowns = []; knockdowns_per_minute = []
     power = []; log_striking_ratio = []
     beaten = []; lost_to = []
+    log_of_striking_defense = []
 
     df = df.sort_values(by='date', ascending=True)
     for fighter in tqdm(unique_fighters):
@@ -286,6 +287,17 @@ def feature_engineering_fighter_level_loop(df):
         
         striking_defense = striking_defense + striking_def
 
+
+        # log of Striking Defense
+        log_striking_def = list_fighters_attribute(fights, fighter, 'red_striking_defense', 'blue_striking_defense')
+        log_striking_def = remove_nans_at_start_of_carrer(log_striking_def).expanding(2).mean()
+        log_striking_def = log_striking_def.to_list()
+        log_striking_def = [i if i != 0.0 else 1 for i in log_striking_def]
+        log_striking_def  = [log(record) for record in log_striking_def]
+  
+        log_of_striking_defense = log_of_striking_defense + log_striking_def
+
+
         # Submission Attempts per 15mins
         sub_attempts = list_fighters_attribute(fights, fighter, 'red_avg_submissions', 'blue_avg_submissions')
         sub_attempts = remove_nans_at_start_of_carrer(sub_attempts).expanding(2).mean()
@@ -310,4 +322,5 @@ def feature_engineering_fighter_level_loop(df):
                         'Striking Defense':striking_defense, 'Submission Attempts':submission_attempts,
                         'Average_Num_Takedowns':average_num_takedowns, 'knockdows_per_minute':knockdowns_per_minute,
                         'Power_Rating':power, 'Log_Striking_Ratio': log_striking_ratio,
-                        'Beaten_Names':beaten, 'Lost_to_names':lost_to}))
+                        'Beaten_Names':beaten, 'Lost_to_names':lost_to,
+                        'Log_Striking_Defense':log_of_striking_defense}))
