@@ -292,21 +292,21 @@ class Engineering:
     @staticmethod
     def Average_distance_of_oppent_to_wins_and_loses(row):
 
-        blue_fighter = [row['blue_Fighter_Odds'], row['B_Takedown Accuracy'],
-                row['B_age'], row['B_RingRust'],
-                row['B_Striking Defense'], row['B_Takedown_Defense'],
-                row['blue_skill'],  row['striking_blue_skill'],
-                row['wrestling_blue_skill'],  row['B_Power_Rating'],
-                row['g_and_p_blue_skill'], row['jiujitsu_blue_skill'],
-                row['B_Strikes_Absorbed_per_Minute'], row['B_AVG_fight_time']]
+        blue_fighter = [row['difference_Fighter_Odds'], row['difference_Log_Striking_Ratio'],
+                row['difference_Log_Striking_Defense'],  row['difference_age'],
+                row['difference_RingRust'], row['striking_difference_skill'],
+                row['difference_fighters_elo'],  row['difference_Takedown_Defense'],
+                row['wrestling_difference_skill'],  row['difference_Power_Rating'],
+                row['g_and_p_difference_skill'], row['jiujitsu_difference_skill'],
+                row['B_win_by_KO/TKO']]
 
-        red_fighter = [row['red_Fighter_Odds'], row['R_Takedown Accuracy'],
-                row['R_age'],   row['R_RingRust'],
-                row['R_Striking Defense'], row['R_Takedown_Defense'],
-                row['red_skill'],  row['striking_red_skill'],
-                row['wrestling_red_skill'],  row['R_Power_Rating'],
-                row['g_and_p_red_skill'], row['jiujitsu_red_skill'],
-                row['R_Strikes_Absorbed_per_Minute'], row['R_AVG_fight_time']]
+        red_fighter = [row['difference_Fighter_Odds'], row['difference_Log_Striking_Ratio'],
+                row['difference_Log_Striking_Defense'],  row['difference_age'],
+                row['difference_RingRust'], row['striking_difference_skill'],
+                row['difference_fighters_elo'],  row['difference_Takedown_Defense'],
+                row['wrestling_difference_skill'],  row['difference_Power_Rating'],
+                row['g_and_p_difference_skill'], row['jiujitsu_difference_skill'],
+                row['R_win_by_KO/TKO']]
 
 
         if len(row['R_Stats_of_Opponents_they_have_beaten']) > 0:
@@ -352,7 +352,37 @@ class Engineering:
 
     def calculate_average_distance_of_opponent_to_previous_wins_loses(self):
 
-        temp  = Normalize_Features(self.Elos_and_features)
+
+        subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 'Average_Odds_f1', 'Average_Odds_f2',
+                   'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
+                   'R_Fight_Number', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio', 
+                   'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts',
+                   'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
+                   'R_Strikes_Absorbed_per_Minute','R_Striking Defense','R_knockdows_per_minute','R_Submission Attempts',
+                   'R_Average_Num_Takedowns','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
+                   'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
+                   'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
+                   'R_Log_Striking_Defense', 'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
+                   'B_Fight_Number',
+                   'B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 
+                   'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 
+                   'B_Strikes_Per_Minute','B_Striking Accuracy','B_Log_Striking_Ratio','B_Strikes_Absorbed_per_Minute','B_Striking Defense',
+                   'B_knockdows_per_minute','B_Submission Attempts','B_Average_Num_Takedowns','B_win_by_Decision_Majority',
+                   'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
+                   'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
+                   'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill', 'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to',
+                   'B_Log_Striking_Defense']
+
+
+        cols_to_keep_whole = ['R_fighter','B_fighter','date', 'Average_Odds_f1', 'Average_Odds_f2',
+                    'win_by','weight_class','Winner','R_win_by_Decision_Majority','R_win_by_Decision_Split', 'R_win_by_Decision_Unanimous',
+                    'R_win_by_KO/TKO', 'R_win_by_Submission','R_win_by_TKO_Doctor_Stoppage','B_win_by_Decision_Majority',
+                    'B_win_by_Decision_Split', 'B_win_by_Decision_Unanimous','B_win_by_KO/TKO', 'B_win_by_Submission',
+                    'B_win_by_TKO_Doctor_Stoppage', 'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
+                    'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to']
+
+
+        temp  = Normalize_Features(self.Elos_and_features, subset_cols, cols_to_keep_whole)
         
         (temp['R_distance_beaten'], 
          temp['R_distance_lost'], 
@@ -378,7 +408,7 @@ class Engineering:
 
 
     def subset_features(self):
-
+        
         self.subset = self.shifted_elos_and_features[['R_fighter','B_fighter','Average_Odds_f1', 'Average_Odds_f2','date','title_bout','win_by','weight_class',
                             'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner', 'R_distance_beaten', 'R_distance_lost',
                             'R_Fight_Number','R_Stance', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio','R_Beaten_Names', 'R_Lost_to_names',
@@ -398,11 +428,13 @@ class Engineering:
                             'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
                             'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names',
                             'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to','B_Log_Striking_Defense']]
+        
 
 
     def Normalize_different_wins(self):
         
         self.final = self.subset.copy()
+        #self.shifted_elos_and_features
         red_columns = ['R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
                        'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage']
                        

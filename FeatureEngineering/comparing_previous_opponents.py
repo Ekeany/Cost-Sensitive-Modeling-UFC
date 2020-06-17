@@ -3,6 +3,34 @@ import pandas as pd
 from tqdm import tqdm
 from sklearn.preprocessing import StandardScaler
 from PreProcessing.Imputer import Imputer
+from ModelProcessing.GetDifferenceBetweenFighterAttributes import GetTheDifferenceBetweenFighterAttributes
+
+
+subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 'Average_Odds_f1', 'Average_Odds_f2',
+                   'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
+                   'R_Fight_Number', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio', 
+                   'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts',
+                   'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
+                   'R_Strikes_Absorbed_per_Minute','R_Striking Defense','R_knockdows_per_minute','R_Submission Attempts',
+                   'R_Average_Num_Takedowns','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
+                   'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
+                   'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
+                   'R_Log_Striking_Defense', 
+                   'B_Fight_Number',
+                   'B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 
+                   'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 
+                   'B_Strikes_Per_Minute','B_Striking Accuracy','B_Log_Striking_Ratio','B_Strikes_Absorbed_per_Minute','B_Striking Defense',
+                   'B_knockdows_per_minute','B_Submission Attempts','B_Average_Num_Takedowns','B_win_by_Decision_Majority',
+                   'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
+                   'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
+                   'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill',
+                   'B_Log_Striking_Defense']
+
+cols_to_keep_whole = ['R_fighter','B_fighter','date', 'Average_Odds_f1', 'Average_Odds_f2',
+                    'win_by','weight_class','Winner','R_win_by_Decision_Majority','R_win_by_Decision_Split', 'R_win_by_Decision_Unanimous',
+                    'R_win_by_KO/TKO', 'R_win_by_Submission','R_win_by_TKO_Doctor_Stoppage','B_win_by_Decision_Majority',
+                    'B_win_by_Decision_Split', 'B_win_by_Decision_Unanimous','B_win_by_KO/TKO', 'B_win_by_Submission',
+                    'B_win_by_TKO_Doctor_Stoppage']
 
 
 def Impute_median(df, cols, group='weight_class'):
@@ -13,21 +41,38 @@ def Impute_median(df, cols, group='weight_class'):
 
     return temp
 
-def Normalize_Features(df):
+
+def BasicFeatureEngineeringFromInferenceInModelBuilding(df, subset_cols, cols_to_keep_whole):
+
+    df = df[subset_cols].copy()
+
+    imputer = Imputer(df)
+    cleaned_df = imputer.impute('bfill')
+
+    second_imputer = Imputer(cleaned_df)
+    cleaned_df = second_imputer.impute_missing_values()
+
+    difference = GetTheDifferenceBetweenFighterAttributes(cleaned_df)
+    difference.get_difference_between_fighters_stats(cols_to_keep_whole=cols_to_keep_whole)
+    difference.drop_solo_columns()
+    df = difference.get_data()
+
+    return df
+
+
+
+def Normalize_Features(df, subset_cols, cols_to_keep_whole):
 
     df = df.copy()
-    cols = ['blue_Fighter_Odds', 'B_Takedown Accuracy',
-             'B_age', 'B_RingRust','B_Striking Defense',
-             'B_Takedown_Defense','blue_skill',  'striking_blue_skill',
-             'wrestling_blue_skill',  'B_Power_Rating',
-             'g_and_p_blue_skill', 'jiujitsu_blue_skill',
-             'B_Strikes_Absorbed_per_Minute', 'B_AVG_fight_time',
-             'red_Fighter_Odds', 'R_Takedown Accuracy',
-             'R_age', 'R_RingRust', 'R_Striking Defense',
-             'R_Takedown_Defense','red_skill',  'striking_red_skill',
-             'wrestling_red_skill',  'R_Power_Rating',
-             'g_and_p_red_skill', 'jiujitsu_red_skill',
-             'R_Strikes_Absorbed_per_Minute', 'R_AVG_fight_time']
+    cols = ['difference_Fighter_Odds','difference_Log_Striking_Ratio',
+    'difference_Log_Striking_Defense', 'difference_age', 'difference_RingRust',
+    'striking_difference_skill','difference_fighters_elo','difference_Takedown_Defense',
+    'wrestling_difference_skill','difference_Power_Rating','g_and_p_difference_skill',
+    'jiujitsu_difference_skill','R_win_by_KO/TKO', 'B_win_by_KO/TKO']
+
+
+    # get the difference between cols
+    df = BasicFeatureEngineeringFromInferenceInModelBuilding(df, subset_cols, cols_to_keep_whole)
 
     # Drop col to merge back on
     norm = StandardScaler().fit_transform(df[cols].values)
@@ -36,32 +81,29 @@ def Normalize_Features(df):
     norm_df = pd.DataFrame(norm, index=df.index, columns=cols)
     norm_df = pd.merge(df, norm_df, left_index=True, right_index=True)
     #imputed_norm_df = Impute_median(norm_df, cols, group='weight_class')
-    imputer = Imputer(norm_df)
-    cleaned_norm = imputer.impute('bfill')
-
-    second_imputer = Imputer(cleaned_norm)
-    cleaned_norm = second_imputer.impute_missing_values()
     
-    return cleaned_norm
+    return norm_df
 
 
 def get_stats_of_previous_fighters_who_they_beat(df, fighter):
 
-    blue_cols = [df['blue_Fighter_Odds'], df['B_Takedown Accuracy'],
-                df['B_age'],   df['B_RingRust'],
-                df['B_Striking Defense'], df['B_Takedown_Defense'],
-                df['blue_skill'],  df['striking_blue_skill'],
-                df['wrestling_blue_skill'],  df['B_Power_Rating'],
-                df['g_and_p_blue_skill'], df['jiujitsu_blue_skill'],
-                df['B_Strikes_Absorbed_per_Minute'], df['B_AVG_fight_time']]
 
-    red_cols  = [df['red_Fighter_Odds'], df['R_Takedown Accuracy'],
-                df['R_age'],   df['R_RingRust'],
-                df['R_Striking Defense'], df['R_Takedown_Defense'],
-                df['red_skill'],  df['striking_red_skill'],
-                df['wrestling_red_skill'],  df['R_Power_Rating'],
-                df['g_and_p_red_skill'], df['jiujitsu_red_skill'],
-                df['R_Strikes_Absorbed_per_Minute'], df['R_AVG_fight_time']]
+    blue_cols = [df['difference_Fighter_Odds'], df['difference_Log_Striking_Ratio'],
+                df['difference_Log_Striking_Defense'],  df['difference_age'],
+                df['difference_RingRust'], df['striking_difference_skill'],
+                df['difference_fighters_elo'],  df['difference_Takedown_Defense'],
+                df['wrestling_difference_skill'],  df['difference_Power_Rating'],
+                df['g_and_p_difference_skill'], df['jiujitsu_difference_skill'],
+                df['B_win_by_KO/TKO']]
+
+    red_cols  = [df['difference_Fighter_Odds'], df['difference_Log_Striking_Ratio'],
+                df['difference_Log_Striking_Defense'],  df['difference_age'],
+                df['difference_RingRust'], df['striking_difference_skill'],
+                df['difference_fighters_elo'],  df['difference_Takedown_Defense'],
+                df['wrestling_difference_skill'],  df['difference_Power_Rating'],
+                df['g_and_p_difference_skill'], df['jiujitsu_difference_skill'],
+                df['R_win_by_KO/TKO']]
+
 
     if df.R_fighter == fighter and df.Winner == 'Red':
         beaten, lost_to = blue_cols , ''
@@ -124,7 +166,7 @@ def get_stats_of_fighters_who_they_have_beaten_or_lost_to(df):
     fighters = []; rank_indexs  = []
     stats_beaten = []; stats_lost_to = []
     df = df.sort_values(by='date', ascending=True)
-    df = Normalize_Features(df)
+    df = Normalize_Features(df, subset_cols, cols_to_keep_whole)
     for fighter in tqdm(unique_fighters):
         
         fights = df[(df.R_fighter == fighter) | (df.B_fighter == fighter)]
