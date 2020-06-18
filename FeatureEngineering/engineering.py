@@ -158,7 +158,9 @@ class Engineering:
         self.fights_and_odds['red_power'],
         self.fights_and_odds['blue_power'],
         self.fights_and_odds['red_total_striking_ratio'],
-        self.fights_and_odds['blue_total_striking_ratio']) = zip(*self.fights_and_odds.apply(lambda x: ESPN_features(x), axis=1))
+        self.fights_and_odds['blue_total_striking_ratio'],
+        self.fights_and_odds['red_total_takedown_percentage'],
+        self.fights_and_odds['blue_total_takedown_percentage']) = zip(*self.fights_and_odds.apply(lambda x: ESPN_features(x), axis=1))
 
     
     def create_elo_ratings(self):
@@ -209,7 +211,9 @@ class Engineering:
                                                           'Log_Striking_Ratio':'R_Log_Striking_Ratio',
                                                           'Beaten_Names':'R_Beaten_Names',
                                                           'Lost_to_names': 'R_Lost_to_names',
-                                                          'Log_Striking_Defense':'R_Log_Striking_Defense'}).set_index('Index')
+                                                          'Log_Striking_Defense':'R_Log_Striking_Defense',
+                                                          'Total_Takedown_Percentage':'R_Total_Takedown_Percentage'}).set_index('Index')
+
         red.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
 
         blue = add_variable_to_split[add_variable_to_split.Blue_or_Red == 'Blue'].rename(columns = {'Fight_Number':'B_Fight_Number',
@@ -229,7 +233,8 @@ class Engineering:
                                                           'Log_Striking_Ratio':'B_Log_Striking_Ratio',
                                                           'Beaten_Names':'B_Beaten_Names',
                                                           'Lost_to_names': 'B_Lost_to_names',
-                                                          'Log_Striking_Defense':'B_Log_Striking_Defense'}).set_index('Index')
+                                                          'Log_Striking_Defense':'B_Log_Striking_Defense',
+                                                          'Total_Takedown_Percentage':'B_Total_Takedown_Percentage'}).set_index('Index')
 
         blue.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
 
@@ -363,6 +368,7 @@ class Engineering:
                    'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                    'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
                    'R_Log_Striking_Defense', 'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to',
+                   'R_Total_Takedown_Percentage',
                    'B_Fight_Number',
                    'B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 
                    'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 
@@ -371,7 +377,7 @@ class Engineering:
                    'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
                    'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
                    'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill', 'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to',
-                   'B_Log_Striking_Defense']
+                   'B_Log_Striking_Defense','B_Total_Takedown_Percentage']
 
 
         cols_to_keep_whole = ['R_fighter','B_fighter','date', 'Average_Odds_f1', 'Average_Odds_f2',
@@ -419,6 +425,7 @@ class Engineering:
                             'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                             'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to','R_Log_Striking_Defense',
+                            'R_Total_Takedown_Percentage',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 'B_distance_beaten', 'B_distance_lost',
@@ -427,14 +434,14 @@ class Engineering:
                             'B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
                             'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
                             'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names',
-                            'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to','B_Log_Striking_Defense']]
+                            'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to','B_Log_Striking_Defense',
+                            'B_Total_Takedown_Percentage']]
         
 
 
     def Normalize_different_wins(self):
         
         self.final = self.subset.copy()
-        #self.shifted_elos_and_features
         red_columns = ['R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
                        'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage']
                        

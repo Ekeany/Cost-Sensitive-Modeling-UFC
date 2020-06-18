@@ -182,7 +182,7 @@ def feature_engineering_fighter_level_loop(df):
     average_num_takedowns = []; knockdowns_per_minute = []
     power = []; log_striking_ratio = []
     beaten = []; lost_to = []
-    log_of_striking_defense = []
+    log_of_striking_defense = []; total_takedown_percentage=[]
 
     df = df.sort_values(by='date', ascending=True)
     for fighter in tqdm(unique_fighters):
@@ -234,6 +234,15 @@ def feature_engineering_fighter_level_loop(df):
         td_accuarcy = td_accuarcy.to_list()
         
         takedown_accuracy = takedown_accuracy + td_accuarcy
+
+
+        # Total Takedown Percentage
+        Tot_takedown_perc = list_fighters_attribute(fights, fighter, 'red_total_takedown_percentage', 'blue_total_takedown_percentage')
+        Tot_takedown_perc = remove_nans_at_start_of_carrer(Tot_takedown_perc).expanding(2).mean()
+        Tot_takedown_perc = Tot_takedown_perc.to_list()
+
+        total_takedown_percentage = total_takedown_percentage + Tot_takedown_perc
+
 
         # strikes per minute
         strike_per_min = list_fighters_attribute(fights, fighter, 'red_strikes_per_minute', 'blue_strikes_per_minute')
@@ -323,4 +332,5 @@ def feature_engineering_fighter_level_loop(df):
                         'Average_Num_Takedowns':average_num_takedowns, 'knockdows_per_minute':knockdowns_per_minute,
                         'Power_Rating':power, 'Log_Striking_Ratio': log_striking_ratio,
                         'Beaten_Names':beaten, 'Lost_to_names':lost_to,
-                        'Log_Striking_Defense':log_of_striking_defense}))
+                        'Log_Striking_Defense':log_of_striking_defense,
+                        'Total_Takedown_Percentage':total_takedown_percentage}))

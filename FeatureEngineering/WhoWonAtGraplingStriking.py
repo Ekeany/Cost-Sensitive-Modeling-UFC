@@ -62,12 +62,6 @@ def check_who_had_more_points(red, blue):
   else:
     return('Draw')
 
-def Calculate_Percentage(success,attempts):
-  if attempts > 0:
-    return(success/attempts)
-  else:
-    return(0)
-
 
 def ground_and_pound(row):
 

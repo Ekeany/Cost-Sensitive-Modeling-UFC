@@ -96,6 +96,24 @@ def ESPN_features(row):
   else:
     blue_td_defense  = np.NaN
 
+
+  # Takedown Percentage: (Takedowns Landed + (Opponent’s Takedowns Attempted –Opponent’s Takedowns Landed))/(Takedowns Attempted+Opponent’s Takedowns Attempted) 
+  red_attempted_takedown = red_total_td - red_successful_td
+  blue_attempted_takedown = blue_total_td - blue_successful_td
+
+  try:
+    red_total_takedown_percentage = (red_successful_td + (blue_attempted_takedown - blue_successful_td))/(red_attempted_takedown + blue_attempted_takedown)
+  
+  except:
+    red_total_takedown_percentage = 1
+
+  try:
+    blue_total_takedown_percentage = (blue_successful_td + (red_attempted_takedown - red_successful_td))/(blue_attempted_takedown + red_attempted_takedown)
+  
+  except:
+    blue_total_takedown_percentage = 1
+
+
   # Kncokdowns per minute
   red_knockdowns  = row['R_KD']/row['total_fight_time']
   blue_knockdowns = row['B_KD']/row['total_fight_time']
@@ -131,4 +149,5 @@ def ESPN_features(row):
         red_avg_submissions, blue_avg_submissions,
         red_knockdowns, blue_knockdowns,
         red_power, blue_power,
-        red_total_striking_ratio , blue_total_striking_ratio)
+        red_total_striking_ratio , blue_total_striking_ratio,
+        red_total_takedown_percentage, blue_total_takedown_percentage)
