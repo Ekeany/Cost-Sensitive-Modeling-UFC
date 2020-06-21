@@ -50,7 +50,8 @@ class GetTheDifferenceBetweenFighterAttributes:
     def get_difference_between_fighters_stats(self, cols_to_keep_whole):
   
       self.my_copy = self.df.copy()
-      self.my_copy.drop(cols_to_keep_whole, axis=1, inplace=True)
+      if cols_to_keep_whole is not None:
+        self.my_copy.drop(cols_to_keep_whole, axis=1, inplace=True)
       
       red_columns = self.find_red_columns(self.df, self.my_copy)
       for red_col in red_columns:
