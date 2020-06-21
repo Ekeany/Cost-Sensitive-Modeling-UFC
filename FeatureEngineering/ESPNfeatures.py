@@ -101,16 +101,16 @@ def ESPN_features(row):
   red_attempted_takedown = red_total_td - red_successful_td
   blue_attempted_takedown = blue_total_td - blue_successful_td
 
-  try:
+  if (red_attempted_takedown + blue_attempted_takedown) != 0 & (red_successful_td + (blue_attempted_takedown - blue_successful_td)) != 0:
     red_total_takedown_percentage = (red_successful_td + (blue_attempted_takedown - blue_successful_td))/(red_attempted_takedown + blue_attempted_takedown)
   
-  except:
+  else:
     red_total_takedown_percentage = 1
 
-  try:
+  if (blue_attempted_takedown + red_attempted_takedown) != 0 & (blue_successful_td + (red_attempted_takedown - red_successful_td)):
     blue_total_takedown_percentage = (blue_successful_td + (red_attempted_takedown - red_successful_td))/(blue_attempted_takedown + red_attempted_takedown)
   
-  except:
+  else:
     blue_total_takedown_percentage = 1
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from math import log
+from math import log, isnan
 from FeatureEngineering.time_utils import Time_difference_days, Time_difference_between_consectuive_dates_in_column
 
 
@@ -183,6 +183,7 @@ def feature_engineering_fighter_level_loop(df):
     power = []; log_striking_ratio = []
     beaten = []; lost_to = []
     log_of_striking_defense = []; total_takedown_percentage=[]
+
 
     df = df.sort_values(by='date', ascending=True)
     for fighter in tqdm(unique_fighters):
