@@ -9,7 +9,7 @@ from scipy.spatial import distance
 
 from PreProcessing.Imputer import Imputer
 from FeatureEngineering.ewma import EWMA
-from FeatureEngineering.ufc_elo import calculate_elos
+from FeatureEngineering.ufc_elo import calculate_elos, calculate_expected
 from FeatureEngineering.odds_utils import convert_american_odds_to_perecentage
 from FeatureEngineering.WhoWonAtGraplingStriking import wrestling, striking, ground_and_pound, JiuJitsu, grappling
 from FeatureEngineering.ESPNfeatures import ESPN_features
@@ -29,16 +29,18 @@ class Engineering:
         self.create_total_fight_time()
         self.merge_files()
         self.create_espn_features()
-        self.create_elo_ratings()
-        self.create_skill_based_features()
         print('Creating Fighter Level Attributes')
         self.create_fighter_level_attributes()
+        self.create_elo_ratings()
+        self.create_skill_based_features()
         self.GetStatsOfFightersWhoTheyHaveBeatenOrLostTo()
         self.check_if_fighter_beat_anyone_who_opponent_has_lost_to()
-        self.calculate_average_distance_of_opponent_to_previous_wins_loses()
 
         print('Shift All Features')
         self.shift_features()
+        self.calculate_fight_weights()
+        self.calculate_average_distance_of_opponent_to_previous_wins_loses()
+        self.get_expected_probabilites_from_elos()
         self.subset_features()
         self.Normalize_different_wins()
         self.save_file(filename='data/engineered_features.csv')
@@ -164,35 +166,35 @@ class Engineering:
 
     
     def create_elo_ratings(self):
-        self.FightsOddsElos = calculate_elos(self.fights_and_odds, k = 25)
+        self.Elos_and_features = calculate_elos(self.Elos_and_features)
 
 
     def create_skill_based_features(self):
 
-        self.FightsOddsElos['Who_Won_at_Wrestling']    = self.fights_and_odds.apply(lambda x: wrestling(x), axis=1)
-        self.FightsOddsElos['Who_Won_at_Striking']     = self.fights_and_odds.apply(lambda x: striking(x), axis=1)
-        self.FightsOddsElos['Who_Won_at_Ground&Pound'] = self.fights_and_odds.apply(lambda x: ground_and_pound(x), axis=1)
-        self.FightsOddsElos['Who_Won_at_JiuJitsu']     = self.fights_and_odds.apply(lambda x: JiuJitsu(x), axis=1)
-        self.FightsOddsElos['Who_Won_at_Grappling']    = self.fights_and_odds.apply(lambda x: grappling(x), axis=1)
+        self.Elos_and_features['Who_Won_at_Wrestling']    = self.Elos_and_features.apply(lambda x: wrestling(x), axis=1)
+        self.Elos_and_features['Who_Won_at_Striking']     = self.Elos_and_features.apply(lambda x: striking(x), axis=1)
+        self.Elos_and_features['Who_Won_at_Ground&Pound'] = self.Elos_and_features.apply(lambda x: ground_and_pound(x), axis=1)
+        self.Elos_and_features['Who_Won_at_JiuJitsu']     = self.Elos_and_features.apply(lambda x: JiuJitsu(x), axis=1)
+        self.Elos_and_features['Who_Won_at_Grappling']    = self.Elos_and_features.apply(lambda x: grappling(x), axis=1)
 
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Winner',
-                                        'red_skill','blue_skill')
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Who_Won_at_Wrestling',
-                                        'wrestling_red_skill','wrestling_blue_skill')
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Who_Won_at_Striking',
-                                        'striking_red_skill','striking_blue_skill')
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Who_Won_at_Ground&Pound',
-                                        'g_and_p_red_skill','g_and_p_blue_skill')
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Who_Won_at_JiuJitsu',
-                                        'jiujitsu_red_skill', 'jiujitsu_blue_skill')
-        self.FightsOddsElos = calculate_skill(self.FightsOddsElos, 'Who_Won_at_Grappling',
-                                        'grappling_red_skill','grappling_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Winner',
+                                            'red_skill','blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Wrestling',
+                                            'wrestling_red_skill','wrestling_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Striking',
+                                            'striking_red_skill','striking_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Ground&Pound',
+                                            'g_and_p_red_skill','g_and_p_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_JiuJitsu',
+                                            'jiujitsu_red_skill', 'jiujitsu_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Grappling',
+                                            'grappling_red_skill','grappling_blue_skill')
 
 
     def create_fighter_level_attributes(self):
         
-        new_features = feature_engineering_fighter_level_loop(self.FightsOddsElos)
-        add_variable_to_split = check_if_each_row_is_either_red_or_blue(new_features, self.FightsOddsElos)
+        new_features = feature_engineering_fighter_level_loop(self.fights_and_odds)
+        add_variable_to_split = check_if_each_row_is_either_red_or_blue(new_features, self.fights_and_odds)
 
         red = add_variable_to_split[add_variable_to_split.Blue_or_Red == 'Red'].rename(columns = {'Fight_Number':'R_Fight_Number',
                                                          'WinLossRatio':'R_WinLossRatio','RingRust':'R_RingRust',
@@ -238,7 +240,7 @@ class Engineering:
 
         blue.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
 
-        self.Elos_and_features = self.FightsOddsElos.join(red)
+        self.Elos_and_features = self.fights_and_odds.join(red)
         self.Elos_and_features = self.Elos_and_features.join(blue)
 
 
@@ -355,6 +357,7 @@ class Engineering:
         return distance_red_beaten, distance_red_lost, distance_blue_beaten, distance_blue_lost
 
 
+
     def calculate_average_distance_of_opponent_to_previous_wins_loses(self):
 
 
@@ -388,7 +391,7 @@ class Engineering:
                     'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to']
 
 
-        temp  = Normalize_Features(self.Elos_and_features, subset_cols, cols_to_keep_whole)
+        temp  = Normalize_Features(self.shifted_elos_and_features, subset_cols, cols_to_keep_whole)
         
         (temp['R_distance_beaten'], 
          temp['R_distance_lost'], 
@@ -401,8 +404,8 @@ class Engineering:
         temp = temp[['R_distance_beaten','R_distance_lost','B_distance_beaten','B_distance_lost',
                     'merge']].copy()
 
-        self.Elos_and_features = self.create_a_merge_column(self.Elos_and_features, 'R_fighter', 'B_fighter', 'date')
-        self.Elos_and_features = self.Elos_and_features.merge(temp, on = 'merge')
+        self.shifted_elos_and_features = self.create_a_merge_column(self.shifted_elos_and_features, 'R_fighter', 'B_fighter', 'date')
+        self.shifted_elos_and_features = self.shifted_elos_and_features.merge(temp, on = 'merge')
 
 
 
@@ -425,7 +428,7 @@ class Engineering:
                             'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                             'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to','R_Log_Striking_Defense',
-                            'R_Total_Takedown_Percentage',
+                            'R_Total_Takedown_Percentage','R_elo_expected',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 'B_distance_beaten', 'B_distance_lost',
@@ -435,8 +438,13 @@ class Engineering:
                             'B_win_by_TKO_Doctor_Stoppage','B_Power_Rating','blue_skill', 'wrestling_blue_skill', 'striking_blue_skill',
                             'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names',
                             'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to','B_Log_Striking_Defense',
-                            'B_Total_Takedown_Percentage']]
+                            'B_Total_Takedown_Percentage', 'B_elo_expected', 'fight_weight']]
         
+
+
+    def get_expected_probabilites_from_elos(self):
+        (self.shifted_elos_and_features['R_elo_expected'],
+        self.shifted_elos_and_features['B_elo_expected']) = zip(*self.shifted_elos_and_features.apply(lambda x: calculate_expected(x), axis=1))
 
 
     def Normalize_different_wins(self):
@@ -457,6 +465,53 @@ class Engineering:
 
     def save_file(self, filename):
         self.final.to_csv(self.BASE_PATH/filename, index=False)
+
+
+    @staticmethod
+    def weight_fight(row):
+
+        fight_time_minutes = row['total_fight_time']
+        method_of_victory  = row['win_by']
+
+        if (method_of_victory == "KO/TKO") | (method_of_victory == "Submission") | (method_of_victory == "TKO - Doctor's Stoppage"):
+            flag = True
+        else:
+            flag = False
+        
+
+        if flag & (fight_time_minutes > 10):
+            return 0.8
+        elif flag & (fight_time_minutes <= 10) & (fight_time_minutes > 5):
+            return 0.9
+        elif flag & (fight_time_minutes <= 5) & (fight_time_minutes > 2.5):
+            return 0.975
+        elif flag & (fight_time_minutes <= 2.5):
+            return 1
+
+        elif method_of_victory == 'Decision - Unanimous':
+            return 0.875
+        elif method_of_victory == 'Decision - Majority':
+            return 0.75
+        elif method_of_victory == 'Decision - Split':
+            return 0.6
+        else:
+            return 0.5
+
+
+
+    def calculate_fight_weights(self):
+
+        self.shifted_elos_and_features['fight_weight'] = self.shifted_elos_and_features.apply(lambda x: self.weight_fight(x), axis=1)
+
+
+
+
+
+
+
+
+
+
 
 
 
