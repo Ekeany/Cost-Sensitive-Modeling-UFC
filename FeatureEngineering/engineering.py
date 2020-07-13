@@ -11,7 +11,7 @@ from PreProcessing.Imputer import Imputer
 from FeatureEngineering.ewma import EWMA
 from FeatureEngineering.ufc_elo import calculate_elos, calculate_expected
 from FeatureEngineering.odds_utils import convert_american_odds_to_perecentage
-from FeatureEngineering.WhoWonAtGraplingStriking import wrestling, striking, ground_and_pound, JiuJitsu, grappling
+from FeatureEngineering.WhoWonAtGraplingStriking import wrestling, striking, ground_and_pound, JiuJitsu, grappling, log_striking, log_defense
 from FeatureEngineering.ESPNfeatures import ESPN_features
 from FeatureEngineering.skill import calculate_skill
 from FeatureEngineering.Fighter_Level_features import feature_engineering_fighter_level_loop, check_if_each_row_is_either_red_or_blue
@@ -35,11 +35,11 @@ class Engineering:
         self.create_skill_based_features()
         self.GetStatsOfFightersWhoTheyHaveBeatenOrLostTo()
         self.check_if_fighter_beat_anyone_who_opponent_has_lost_to()
+        self.calculate_average_distance_of_opponent_to_previous_wins_loses()
 
         print('Shift All Features')
         self.shift_features()
         self.calculate_fight_weights()
-        self.calculate_average_distance_of_opponent_to_previous_wins_loses()
         self.get_expected_probabilites_from_elos()
         self.subset_features()
         self.Normalize_different_wins()
@@ -177,6 +177,10 @@ class Engineering:
         self.Elos_and_features['Who_Won_at_JiuJitsu']     = self.Elos_and_features.apply(lambda x: JiuJitsu(x), axis=1)
         self.Elos_and_features['Who_Won_at_Grappling']    = self.Elos_and_features.apply(lambda x: grappling(x), axis=1)
 
+        self.Elos_and_features['who_won_log_striking']    = self.Elos_and_features.apply(lambda x: log_striking(x), axis=1)
+        self.Elos_and_features['who_won_log_defense']    = self.Elos_and_features.apply(lambda x: log_defense(x), axis=1)
+
+
         self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Winner',
                                             'red_skill','blue_skill')
         self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Wrestling',
@@ -189,6 +193,11 @@ class Engineering:
                                             'jiujitsu_red_skill', 'jiujitsu_blue_skill')
         self.Elos_and_features = calculate_skill(self.Elos_and_features, 'Who_Won_at_Grappling',
                                             'grappling_red_skill','grappling_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'who_won_log_striking',
+                                            'log_striking_red_skill','log_striking_blue_skill')
+        self.Elos_and_features = calculate_skill(self.Elos_and_features, 'who_won_log_defense',
+                                            'log_defense_red_skill','log_defense_blue_skill')
+        
 
 
     def create_fighter_level_attributes(self):
@@ -391,7 +400,7 @@ class Engineering:
                     'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to']
 
 
-        temp  = Normalize_Features(self.shifted_elos_and_features, subset_cols, cols_to_keep_whole)
+        temp  = Normalize_Features(self.Elos_and_features, subset_cols, cols_to_keep_whole)
         
         (temp['R_distance_beaten'], 
          temp['R_distance_lost'], 
@@ -404,8 +413,8 @@ class Engineering:
         temp = temp[['R_distance_beaten','R_distance_lost','B_distance_beaten','B_distance_lost',
                     'merge']].copy()
 
-        self.shifted_elos_and_features = self.create_a_merge_column(self.shifted_elos_and_features, 'R_fighter', 'B_fighter', 'date')
-        self.shifted_elos_and_features = self.shifted_elos_and_features.merge(temp, on = 'merge')
+        self.Elos_and_features = self.create_a_merge_column(self.Elos_and_features, 'R_fighter', 'B_fighter', 'date')
+        self.Elos_and_features = self.Elos_and_features.merge(temp, on = 'merge')
 
 
 
@@ -428,7 +437,8 @@ class Engineering:
                             'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                             'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to','R_Log_Striking_Defense',
-                            'R_Total_Takedown_Percentage','R_elo_expected',
+                            'R_Total_Takedown_Percentage','R_elo_expected', 'log_striking_red_skill', 'log_striking_blue_skill',
+                            'log_defense_red_skill','log_defense_blue_skill',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 'B_distance_beaten', 'B_distance_lost',

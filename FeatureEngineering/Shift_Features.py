@@ -49,7 +49,7 @@ def Shift_all_features(df):
                  'R_Striking Defense','R_knockdows_per_minute','R_Submission Attempts',
                  'R_Average_Num_Takedowns','R_Power_Rating','red_skill','wrestling_red_skill',
                  'striking_red_skill', 'g_and_p_red_skill','jiujitsu_red_skill',
-                 'grappling_red_skill']
+                 'grappling_red_skill', 'log_striking_red_skill', 'log_defense_red_skill']
                  
                  
   cols_to_shift_blue  = ['blue_fighters_elo', 'B_WinLossRatio',
@@ -59,7 +59,8 @@ def Shift_all_features(df):
                  'B_Striking Defense','B_knockdows_per_minute','B_Submission Attempts',
                  'B_Average_Num_Takedowns','B_Power_Rating','blue_skill','wrestling_blue_skill',
                  'striking_blue_skill', 'g_and_p_blue_skill','jiujitsu_blue_skill',
-                 'grappling_blue_skill']
+                 'grappling_blue_skill', 'log_striking_blue_skill','log_defense_blue_skill']
+                 
 
   df = df.sort_values(by='date', ascending=True)
 

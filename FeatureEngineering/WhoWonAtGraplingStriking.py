@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from math import log
 
 '''
 Grappling:
@@ -245,3 +246,80 @@ def striking(row):
 
     else:
       return('Draw')
+
+
+
+def log_striking(row):
+
+
+    if row.win_by == 'KO/TKO':
+        return(row.Winner)
+    
+
+    else:
+        red_significant_strikes_landed,  red_total_sig_strikes_thrown = split_of_from_stat(row['R_SIG_STR.'])
+        blue_significant_strikes_landed, blue_total_sig_strikes_thrown = split_of_from_stat(row['B_SIG_STR.'])
+
+
+        try:
+            red_log = log(red_significant_strikes_landed/red_total_sig_strikes_thrown)
+
+        except:
+            red_log = 0
+
+
+        try:
+            blue_log = log(blue_significant_strikes_landed/blue_total_sig_strikes_thrown)
+
+        except:
+            blue_log = 0
+
+
+        if blue_log > red_log:
+            return 0
+        
+        elif blue_log < red_log:
+            return 1
+
+        else:
+            return 0.5
+
+
+
+
+def log_defense(row):
+
+
+    if row.win_by == 'KO/TKO':
+        return(row.Winner)
+    
+
+    else:
+        red_significant_strikes_landed,  red_total_sig_strikes_thrown = split_of_from_stat(row['R_SIG_STR.'])
+        blue_significant_strikes_landed, blue_total_sig_strikes_thrown = split_of_from_stat(row['B_SIG_STR.'])
+
+        red_strikes_avoided = (blue_total_sig_strikes_thrown - blue_significant_strikes_landed)
+        blue_strikes_avoided = (red_total_sig_strikes_thrown - red_significant_strikes_landed)
+
+        try:
+            red_log = log(red_strikes_avoided/blue_total_sig_strikes_thrown)
+
+        except:
+            red_log = 0
+
+
+        try:
+            blue_log = log(blue_strikes_avoided/red_total_sig_strikes_thrown)
+
+        except:
+            blue_log = 0
+
+
+        if blue_log > red_log:
+            return 0
+        
+        elif blue_log < red_log:
+            return 1
+
+        else:
+            return 0.5
