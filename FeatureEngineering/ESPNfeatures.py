@@ -97,6 +97,20 @@ def ESPN_features(row):
     blue_td_defense  = np.NaN
 
 
+  # striking grappling ratio infer a gameplan
+  try:
+    red_strikes_or_grapple  = red_total_td/red_total_strikes
+  
+  except:
+    red_strikes_or_grapple = 0
+  
+  try:
+    blue_strikes_or_grapple = blue_total_td/blue_total_strikes
+  
+  except:
+    blue_strikes_or_grapple = 0
+
+
   # Takedown Percentage: (Takedowns Landed + (Opponent’s Takedowns Attempted –Opponent’s Takedowns Landed))/(Takedowns Attempted+Opponent’s Takedowns Attempted) 
   red_attempted_takedown = red_total_td - red_successful_td
   blue_attempted_takedown = blue_total_td - blue_successful_td
@@ -150,4 +164,5 @@ def ESPN_features(row):
         red_knockdowns, blue_knockdowns,
         red_power, blue_power,
         red_total_striking_ratio , blue_total_striking_ratio,
-        red_total_takedown_percentage, blue_total_takedown_percentage)
+        red_total_takedown_percentage, blue_total_takedown_percentage,
+        red_strikes_or_grapple, blue_strikes_or_grapple)

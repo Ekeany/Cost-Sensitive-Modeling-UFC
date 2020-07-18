@@ -5,18 +5,34 @@ from math import log, isnan
 from FeatureEngineering.time_utils import Time_difference_days, Time_difference_between_consectuive_dates_in_column
 
 
-def extract_stats(row, fighter, red_column, blue_column):
+def extract_stats(row, fighter, red_column, blue_column, opponent=False):
 
-    if row.R_fighter == fighter:
-        return(row[red_column])
-    
-    elif row.B_fighter == fighter:
-        return(row[blue_column])
+    if opponent:
+
+        if row.R_fighter == fighter:
+            return(row[blue_column])
+        
+        elif row.B_fighter == fighter:
+            return(row[red_column])
+
+    else:
+
+        if row.R_fighter == fighter:
+            return(row[red_column])
+        
+        elif row.B_fighter == fighter:
+            return(row[blue_column])
 
 
 def list_fighters_attribute(df, fighter, red_column, blue_column):
-    values = df.apply(lambda x : extract_stats(x, fighter, red_column, blue_column), axis = 1)
+    values = df.apply(lambda x : extract_stats(x, fighter, red_column, blue_column, opponent=False), axis = 1)
     return(values)
+
+
+def list_opponent_attributes(df, fighter, red_column, blue_column):
+    values = df.apply(lambda x : extract_stats(x, fighter, red_column, blue_column, opponent=True), axis = 1)
+    return(values)
+
 
 
 def check_if_red_or_blue(df2, fighter, index):
@@ -183,6 +199,8 @@ def feature_engineering_fighter_level_loop(df):
     power = []; log_striking_ratio = []
     beaten = []; lost_to = []
     log_of_striking_defense = []; total_takedown_percentage=[]
+    average_strikes_or_grapple = []; opp_log_striking_ratio = []
+    opponents_avg_strikes_or_grapple = []; opp_log_of_striking_defense = []
 
 
     df = df.sort_values(by='date', ascending=True)
@@ -252,7 +270,7 @@ def feature_engineering_fighter_level_loop(df):
         
         strikes_per_minute = strikes_per_minute + strike_per_min
 
-        # striking ratio
+        # log striking ratio
         strike_ratio = list_fighters_attribute(fights, fighter, 'red_total_striking_ratio', 'blue_total_striking_ratio')
         strike_ratio = remove_nans_at_start_of_carrer(strike_ratio).expanding(2).mean()
         strike_ratio = strike_ratio.to_list()
@@ -315,12 +333,51 @@ def feature_engineering_fighter_level_loop(df):
         
         submission_attempts = submission_attempts + sub_attempts
         
+
         # Average Number of Takedowns per Minute
         avg_takedowns = list_fighters_attribute(fights, fighter, 'red_avg_takedowns', 'blue_avg_takedowns')
         avg_takedowns = remove_nans_at_start_of_carrer(avg_takedowns).expanding(2).mean()
         avg_takedowns = avg_takedowns.to_list()
         
         average_num_takedowns = average_num_takedowns + avg_takedowns
+
+
+        # striking grapling ratio
+        strikes_or_grapple = list_fighters_attribute(fights, fighter, 'red_strikes_or_grapple', 'blue_strikes_or_grapple')
+        avg_strikes_or_grapple = remove_nans_at_start_of_carrer(strikes_or_grapple).expanding(2).mean()
+        avg_strikes_or_grapple = avg_strikes_or_grapple.to_list()
+        
+        average_strikes_or_grapple = average_strikes_or_grapple + avg_strikes_or_grapple
+
+
+        # opponents striking grapling ratio
+        opp_strikes_or_grapple = list_opponent_attributes(fights, fighter, 'red_strikes_or_grapple', 'blue_strikes_or_grapple')
+        opp_avg_strikes_or_grapple = remove_nans_at_start_of_carrer(opp_strikes_or_grapple).expanding(2).mean()
+        opp_avg_strikes_or_grapple = opp_avg_strikes_or_grapple.to_list()
+        
+        opponents_avg_strikes_or_grapple = opponents_avg_strikes_or_grapple + opp_avg_strikes_or_grapple
+
+
+        # opponents log striking ratio
+        opp_strike_ratio = list_opponent_attributes(fights, fighter, 'red_total_striking_ratio', 'blue_total_striking_ratio')
+        opp_strike_ratio = remove_nans_at_start_of_carrer(opp_strike_ratio).expanding(2).mean()
+        opp_strike_ratio = opp_strike_ratio.to_list()
+        opp_strike_ratio = [i if i != 0.0 else 1 for i in opp_strike_ratio]
+        opp_strike_ratio  = [log(record) for record in opp_strike_ratio]
+  
+        opp_log_striking_ratio = opp_log_striking_ratio + opp_strike_ratio
+
+
+        # opponents log of Striking Defense
+        opp_log_striking_def = list_opponent_attributes(fights, fighter, 'red_striking_defense', 'blue_striking_defense')
+        opp_log_striking_def = remove_nans_at_start_of_carrer(opp_log_striking_def).expanding(2).mean()
+        opp_log_striking_def = opp_log_striking_def.to_list()
+        opp_log_striking_def = [i if i != 0.0 else 1 for i in opp_log_striking_def]
+        opp_log_striking_def  = [log(record) for record in opp_log_striking_def]
+  
+        opp_log_of_striking_defense = opp_log_of_striking_defense + opp_log_striking_def
+        
+
 
     return(pd.DataFrame({'Index':rank_indexs,'Fighters':fighters,
                         'Fight_Number':fight_number, 'WinLossRatio':winLossValues,
@@ -334,4 +391,8 @@ def feature_engineering_fighter_level_loop(df):
                         'Power_Rating':power, 'Log_Striking_Ratio': log_striking_ratio,
                         'Beaten_Names':beaten, 'Lost_to_names':lost_to,
                         'Log_Striking_Defense':log_of_striking_defense,
-                        'Total_Takedown_Percentage':total_takedown_percentage}))
+                        'Total_Takedown_Percentage':total_takedown_percentage,
+                        'average_strikes_or_grapple':average_strikes_or_grapple,
+                        'opponents_avg_strikes_or_grapple':opponents_avg_strikes_or_grapple,
+                        'opp_log_striking_ratio':opp_log_striking_ratio,
+                        'opp_log_of_striking_defense':opp_log_of_striking_defense}))
