@@ -142,3 +142,4 @@ cython_debug/
 boruta-shap.iml
 .idea/
 catboost_info/
+cb_model.json
