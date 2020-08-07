@@ -104,6 +104,23 @@ def calculate_winLoss(df, fighter):
     return(indices, winLoss)
 
 
+def calculate_variance_from_mean_in_odds(df, fighter, red_column ,blue_column):
+    
+    varience_storage  = [0]
+    
+    for row in range(1,len(df)):
+        
+        df_slice = df.loc[:row,:].copy()
+
+        stats = [extract_stats(row_, fighter, red_column, blue_column, opponent=False) for index, row_ in df_slice.iterrows()]
+        
+        mean = sum(stats[:-1])/len(stats[:-1])
+        varience = stats[-1] - mean
+        varience_storage.append(varience)
+
+    return varience_storage
+
+
 def which_fighter_won(df, fighter):
 
     if df.R_fighter == fighter and df.Winner == 'Red':
@@ -201,6 +218,7 @@ def feature_engineering_fighter_level_loop(df):
     log_of_striking_defense = []; total_takedown_percentage=[]
     average_strikes_or_grapple = []; opp_log_striking_ratio = []
     opponents_avg_strikes_or_grapple = []; opp_log_of_striking_defense = []
+    odds_varience = []
 
 
     df = df.sort_values(by='date', ascending=True)
@@ -376,7 +394,12 @@ def feature_engineering_fighter_level_loop(df):
         opp_log_striking_def  = [log(record) for record in opp_log_striking_def]
   
         opp_log_of_striking_defense = opp_log_of_striking_defense + opp_log_striking_def
-        
+
+
+
+        # variation in odds from mean
+        varience_of_odds = calculate_variance_from_mean_in_odds(fights, fighter, 'red_fighter median', 'blue_fighter median')
+        odds_varience = odds_varience + varience_of_odds
 
 
     return(pd.DataFrame({'Index':rank_indexs,'Fighters':fighters,
@@ -395,4 +418,5 @@ def feature_engineering_fighter_level_loop(df):
                         'average_strikes_or_grapple':average_strikes_or_grapple,
                         'opponents_avg_strikes_or_grapple':opponents_avg_strikes_or_grapple,
                         'opp_log_striking_ratio':opp_log_striking_ratio,
-                        'opp_log_of_striking_defense':opp_log_of_striking_defense}))
+                        'opp_log_of_striking_defense':opp_log_of_striking_defense,
+                        'odds_varience':odds_varience}))

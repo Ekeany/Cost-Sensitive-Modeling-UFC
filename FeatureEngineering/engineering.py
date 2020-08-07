@@ -6,6 +6,7 @@ import sys
 import os
 from pathlib import Path
 from scipy.spatial import distance
+from sklearn.linear_model import LinearRegression
 
 from PreProcessing.Imputer import Imputer
 from FeatureEngineering.ewma import EWMA
@@ -28,6 +29,8 @@ class Engineering:
         self.read_files()
         self.create_total_fight_time()
         self.merge_files()
+        self.find_which_odds_relate_to_which_fighter()
+        self.calaculate_stamina()
         self.create_espn_features()
         print('Creating Fighter Level Attributes')
         self.create_fighter_level_attributes()
@@ -72,6 +75,14 @@ class Engineering:
             raise FileNotFoundError('Cannot find the data/raw_fighter_odds.csv')
 
 
+        try:
+            self.best_fight_odds = pd.read_csv(self.BASE_PATH/'data/best_fight_odds.csv', parse_dates=['Date']) 
+
+        except:
+            raise FileNotFoundError('Cannot find the data/best_fight_odds.csv')
+
+
+
     @staticmethod
     def create_a_merge_column(df, fighter_one, fighter_two, date):
 
@@ -105,6 +116,7 @@ class Engineering:
         self.odds = self.create_a_merge_column(self.odds, 'Fighter_one', 'Fighter_two', 'Date')
         self.fights = self.create_a_merge_column(self.fight, 'R_fighter', 'B_fighter', 'date')
         self.raw_fight = self.create_a_merge_column(self.raw_fight, 'R_fighter', 'B_fighter', 'date')
+        self.best_fight_odds = self.create_a_merge_column(self.best_fight_odds, 'fighter1', 'fighter2', 'Date')
 
 
     def merge_files(self):
@@ -128,7 +140,12 @@ class Engineering:
                                             'B_TOTAL_STR.','R_TOTAL_STR.','B_SIG_STR_pct','R_SIG_STR_pct','B_SIG_STR.','R_SIG_STR.',
                                             'B_KD','R_KD','merge']]
 
+
         self.fights_and_odds = self.fights_and_odds.merge(raw_fight_selected, on = 'merge')
+        self.fights_and_odds = self.fights_and_odds.merge(self.best_fight_odds, on = 'merge',
+                                                          how='left', suffixes=('', '_y'))
+
+        self.fights_and_odds.drop(self.fights_and_odds.filter(regex='_y$').columns.tolist(),axis=1, inplace=True)
 
 
         # drop duplicates two odds for same fight
@@ -137,6 +154,38 @@ class Engineering:
                               'Referee','location'], inplace = True, axis = 1)
 
     
+    @staticmethod
+    def find_mismatch(row, fighter_one_cols, fighter_two_cols):
+
+        if(row.R_fighter != row.fighter1) & (row.R_fighter == row.fighter2):
+            
+            for fighter_one, fighter_two in zip(fighter_one_cols, fighter_two_cols):
+                row[fighter_one], row[fighter_two] = row[fighter_two], row[fighter_one]
+
+        else:
+            pass
+
+
+        return row
+
+
+    @staticmethod
+    def find_fighter1_and_fighter2_cols(df):
+
+        subset_cols_one = [col for col in df.columns.to_list() if 'red_fighter' in col]
+        subset_cols_two = [col.replace('red_fighter', 'blue_fighter') for col in subset_cols_one]
+
+        return subset_cols_one, subset_cols_two
+
+
+
+    def find_which_odds_relate_to_which_fighter(self):
+
+        fighter_one_cols, fighter_two_cols = self.find_fighter1_and_fighter2_cols(self.fights_and_odds)
+        self.fights_and_odds = self.fights_and_odds.apply(lambda x: self.find_mismatch(x, fighter_one_cols, fighter_two_cols), axis=1)
+
+
+
     def create_espn_features(self):
 
         (self.fights_and_odds['red_strikes_per_minute'],
@@ -229,7 +278,8 @@ class Engineering:
                                                           'average_strikes_or_grapple':'R_average_strikes_or_grapple',
                                                           'opponents_avg_strikes_or_grapple':'R_opponents_avg_strikes_or_grapple',
                                                           'opp_log_striking_ratio':'R_opp_log_striking_ratio',
-                                                          'opp_log_of_striking_defense':'R_opp_log_of_striking_defense'}).set_index('Index')
+                                                          'opp_log_of_striking_defense':'R_opp_log_of_striking_defense',
+                                                          'odds_varience':'R_odds_varience'}).set_index('Index')
 
         red.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
 
@@ -255,7 +305,8 @@ class Engineering:
                                                           'average_strikes_or_grapple':'B_average_strikes_or_grapple',
                                                           'opponents_avg_strikes_or_grapple':'B_opponents_avg_strikes_or_grapple',
                                                           'opp_log_striking_ratio':'B_opp_log_striking_ratio',
-                                                          'opp_log_of_striking_defense':'B_opp_log_of_striking_defense'}).set_index('Index')
+                                                          'opp_log_of_striking_defense':'B_opp_log_of_striking_defense',
+                                                          'odds_varience':'B_odds_varience'}).set_index('Index')
 
 
         blue.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
@@ -450,7 +501,7 @@ class Engineering:
                             'R_Stats_of_Opponents_they_have_beaten', 'R_Stats_of_Opponents_they_have_lost_to','R_Log_Striking_Defense',
                             'R_Total_Takedown_Percentage','R_elo_expected', 'log_striking_red_skill', 'log_striking_blue_skill',
                             'log_defense_red_skill','log_defense_blue_skill','R_opponents_avg_strikes_or_grapple', 'R_opp_log_striking_ratio',
-                            'R_opp_log_of_striking_defense',
+                            'R_opp_log_of_striking_defense', 'R_odds_varience', 'red_stamina',
                             'B_Fight_Number',
                             'B_Stance','B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 'B_Beaten_Similar', 
                             'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 'B_distance_beaten', 'B_distance_lost',
@@ -461,7 +512,22 @@ class Engineering:
                             'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill','B_Beaten_Names', 'B_Lost_to_names',
                             'B_Stats_of_Opponents_they_have_beaten', 'B_Stats_of_Opponents_they_have_lost_to','B_Log_Striking_Defense',
                             'B_Total_Takedown_Percentage', 'B_elo_expected', 'fight_weight', 'B_opponents_avg_strikes_or_grapple', 'B_opp_log_striking_ratio',
-                            'B_opp_log_of_striking_defense']]
+                            'B_opp_log_of_striking_defense','B_odds_varience','blue_stamina',
+                            'blue_fighter mean', 'blue_fighter median', 'blue_fighter std', 'red_fighter mean', 'red_fighter median',
+                            'red_fighter std', 'over 2½ rounds mean', 'over 2½ rounds median', 'over 2½ rounds std', 'under 2½ rounds mean',
+                            'under 2½ rounds median', 'under 2½ rounds std', 'red_fighter wins by decision mean',
+                            'red_fighter wins by decision median', 'red_fighter wins by decision std', 'blue_fighter wins by decision mean',
+                            'blue_fighter wins by decision median', 'blue_fighter wins by decision std', 'red_fighter wins by submission mean',
+                            'red_fighter wins by submission median', 'red_fighter wins by submission std','blue_fighter wins by submission mean',
+                            'blue_fighter wins by submission median','blue_fighter wins by submission std','red_fighter wins by tko/ko mean', 'red_fighter wins by tko/ko median',
+                            'red_fighter wins by tko/ko std', 'blue_fighter wins by tko/ko mean','blue_fighter wins by tko/ko median',
+                            'blue_fighter wins by tko/ko std', 'red_fighter wins in round 1 mean','red_fighter wins in round 1 median',
+                            'red_fighter wins in round 1 std', 'red_fighter wins in round 3 mean','red_fighter wins in round 3 median',
+                            'red_fighter wins in round 3 std','red_fighter wins in round 2 mean','red_fighter wins in round 2 median',
+                            'red_fighter wins in round 2 std','blue_fighter wins in round 3 mean','blue_fighter wins in round 3 median',
+                            'blue_fighter wins in round 3 std', 'blue_fighter wins in round 2 mean',
+                            'blue_fighter wins in round 2 median', 'blue_fighter wins in round 2 std', 'blue_fighter wins in round 1 mean',
+                            'blue_fighter wins in round 1 median','blue_fighter wins in round 1 std']]
         
 
 
@@ -526,6 +592,48 @@ class Engineering:
 
         self.shifted_elos_and_features['fight_weight'] = self.shifted_elos_and_features.apply(lambda x: self.weight_fight(x), axis=1)
 
+
+    @staticmethod
+    def get_wins_round_data(row, red_or_blue):
+
+        if red_or_blue == 'red':
+            return np.array([row['red_fighter wins in round 1 mean'], row['red_fighter wins in round 2 mean'],	row['red_fighter wins in round 3 mean']]).reshape(-1, 1)
+        
+        else:
+            return np.array([row['blue_fighter wins in round 1 mean'], row['blue_fighter wins in round 2 mean'],	row['blue_fighter wins in round 3 mean']]).reshape(-1, 1)
+
+
+    @staticmethod
+    def get_coefiecents(X, y):
+        
+        try:
+            model = LinearRegression().fit(X, y)
+            return model.coef_[0][0]
+
+        except:
+            return 9999
+
+    
+
+    def calaculate_stamina(self):
+
+
+        X = np.array([1,2,3]).reshape(-1, 1)
+        red_stamina = []
+        blue_stamina = []
+
+        for index, row in self.fights_and_odds.iterrows():
+            
+            y_blue = self.get_wins_round_data(row, red_or_blue='blue')
+            y_red = self.get_wins_round_data(row, red_or_blue='red')
+            
+            red_stamina.append(self.get_coefiecents(X, y_red))
+            blue_stamina.append(self.get_coefiecents(X, y_blue))
+
+        self.fights_and_odds['red_stamina']  = red_stamina
+        self.fights_and_odds['blue_stamina'] = blue_stamina
+
+        return self.fights_and_odds
 
 
 

@@ -56,6 +56,7 @@ def check_ground_strikes(red,blue):
     return('draw')
 
 def check_who_had_more_points(red, blue):
+
   if red > blue:
     return('Red')
   elif blue > red:
@@ -177,28 +178,12 @@ def grappling(row):
     red_sub_attempts =  row.R_SUB_ATT
     blue_sub_attempts = row.B_SUB_ATT
 
-    # Ground Stikes
-    red_ground_strikes, _ = split_of_from_stat(row.R_GROUND)
-    blue_ground_strikes, _ = split_of_from_stat(row.B_GROUND)
-
-
-    flag = check_ground_strikes(red_ground_strikes, blue_ground_strikes)
-
-    if flag == 'red':
-      red_strikes = 2
-      blue_strikes = 0
-    elif flag == 'blue':
-      red_strikes = 0
-      blue_strikes = 2
-    else:
-      red_strikes = 0
-      blue_strikes = 0
-
+   
     red_points = ((2*red_takedowns_success)+(1*red_takedowns_defenses)+
-                (2*red_reversals)+(3*red_passes)+(2*red_sub_attempts)) + red_strikes
+                (2*red_reversals)+(3*red_passes)+(2*red_sub_attempts))
 
     blue_points = ((2*blue_takedowns_success)+(1*blue_takedowns_defenses)+
-                (2*blue_reversals)+(3*blue_passes)+(2*blue_sub_attempts)) + blue_strikes
+                (2*blue_reversals)+(3*blue_passes)+(2*blue_sub_attempts))
 
     if abs(blue_points-red_points) > 1:
       output = check_who_had_more_points(red_points, blue_points)
