@@ -47,7 +47,7 @@ class GetTheDifferenceBetweenFighterAttributes:
 
 
 
-    def get_difference_between_fighters_stats(self, cols_to_keep_whole):
+    def get_difference_between_fighters_stats(self, cols_to_keep_whole, subtract_or_divide=True):
   
       self.my_copy = self.df.copy()
       if cols_to_keep_whole is not None:
@@ -59,7 +59,15 @@ class GetTheDifferenceBetweenFighterAttributes:
         blue_col = self.find_pairing_column_name(red_col)
         new_col_name = self.new_column_name(red_col)
 
-        self.df[new_col_name] = self.my_copy[red_col] - self.my_copy[blue_col]
+        if subtract_or_divide == 'ratio':
+          self.df[new_col_name] = self.my_copy[red_col] / self.my_copy[blue_col]
+        
+        elif subtract_or_divide == 'normalized':
+          self.df[new_col_name] = (self.my_copy[red_col] - self.my_copy[blue_col])/(self.my_copy[red_col] + self.my_copy[blue_col])
+
+        else:
+          self.df[new_col_name] = self.my_copy[red_col] - self.my_copy[blue_col]
+          
 
 
 
