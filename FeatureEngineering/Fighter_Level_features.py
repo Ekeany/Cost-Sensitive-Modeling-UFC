@@ -104,6 +104,46 @@ def calculate_winLoss(df, fighter):
     return(indices, winLoss)
 
 
+def check_if_fight_was_finished(df, fighter):
+
+    if df.R_fighter == fighter:
+        
+        if(df['R_win_by_KO/TKO'] == 1) | (df['R_win_by_Submission'] == 1) | (df['R_win_by_TKO_Doctor_Stoppage'] == 1):
+            return 1
+        
+        else:
+            return 0
+
+    elif df.B_fighter == fighter:
+        
+        if(df['B_win_by_KO/TKO'] == 1) | (df['B_win_by_Submission'] == 1) | (df['B_win_by_TKO_Doctor_Stoppage'] == 1):
+            
+            return 1
+        else:
+            return 0
+    
+    else:
+        return 0
+
+
+def calculate_FinshRatio(df, fighter):
+    
+    result  = []
+    finish_ratio = []
+    indices   = []
+    
+    for index, row in df.iterrows():
+        # store results
+        result.append(check_if_fight_was_finished(row, fighter))
+        # calculate the winLoss ratio and store value for
+        # each time iteration
+        finish_ratio.append(sum(result)/len(result))
+        indices.append(index)
+
+    return(indices, finish_ratio)
+
+
+
 def calculate_variance_from_mean_in_odds(df, fighter, red_column ,blue_column):
     
     varience_storage  = [0]
@@ -218,7 +258,7 @@ def feature_engineering_fighter_level_loop(df):
     log_of_striking_defense = []; total_takedown_percentage=[]
     average_strikes_or_grapple = []; opp_log_striking_ratio = []
     opponents_avg_strikes_or_grapple = []; opp_log_of_striking_defense = []
-    odds_varience = []
+    odds_varience = []; finish_ratio = []
 
 
     df = df.sort_values(by='date', ascending=True)
@@ -237,6 +277,12 @@ def feature_engineering_fighter_level_loop(df):
         indices, winLossratio = calculate_winLoss(fights, fighter)
         winLossindex  = winLossindex  + indices
         winLossValues = winLossValues + winLossratio
+
+
+        # calculate_FinshRatio
+        _, FinshRatio = calculate_FinshRatio(fights, fighter)
+        finish_ratio = finish_ratio + FinshRatio
+
 
         # fighters names who they have either beaten or lost too
         beaten_, lost_to_ = calculate_fighters_beat_and_lost(fights, fighter)
@@ -402,6 +448,7 @@ def feature_engineering_fighter_level_loop(df):
         odds_varience = odds_varience + varience_of_odds
 
 
+
     return(pd.DataFrame({'Index':rank_indexs,'Fighters':fighters,
                         'Fight_Number':fight_number, 'WinLossRatio':winLossValues,
                         'RingRust':ringRust,'AVG_fight_time':average_fight_time,
@@ -419,4 +466,4 @@ def feature_engineering_fighter_level_loop(df):
                         'opponents_avg_strikes_or_grapple':opponents_avg_strikes_or_grapple,
                         'opp_log_striking_ratio':opp_log_striking_ratio,
                         'opp_log_of_striking_defense':opp_log_of_striking_defense,
-                        'odds_varience':odds_varience}))
+                        'odds_varience':odds_varience, 'finish_ratio':finish_ratio}))

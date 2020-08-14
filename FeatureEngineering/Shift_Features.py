@@ -50,7 +50,7 @@ def Shift_all_features(df):
                  'R_Average_Num_Takedowns','R_Power_Rating','red_skill','wrestling_red_skill',
                  'striking_red_skill', 'g_and_p_red_skill','jiujitsu_red_skill','R_Log_Striking_Ratio',
                  'grappling_red_skill', 'log_striking_red_skill', 'log_defense_red_skill',
-                 'R_opponents_avg_strikes_or_grapple', 'R_opp_log_striking_ratio',
+                 'R_opponents_avg_strikes_or_grapple', 'R_opp_log_striking_ratio', 'R_finish_ratio',
                  'R_opp_log_of_striking_defense','R_average_strikes_or_grapple', 'R_Total_Takedown_Percentage']
                  
                  
@@ -58,7 +58,7 @@ def Shift_all_features(df):
                  'B_Winning_Streak','B_Losing_Streak','B_AVG_fight_time', 'B_Log_Striking_Ratio',
                  'B_total_title_bouts','B_Takedown_Defense','B_Takedown Accuracy',
                  'B_Strikes_Per_Minute','B_Striking Accuracy','B_Strikes_Absorbed_per_Minute',
-                 'B_Striking Defense','B_knockdows_per_minute','B_Submission Attempts',
+                 'B_Striking Defense','B_knockdows_per_minute','B_Submission Attempts', 'B_finish_ratio',
                  'B_Average_Num_Takedowns','B_Power_Rating','blue_skill','wrestling_blue_skill',
                  'striking_blue_skill', 'g_and_p_blue_skill','jiujitsu_blue_skill', 'B_average_strikes_or_grapple',
                  'grappling_blue_skill', 'log_striking_blue_skill','log_defense_blue_skill', 'B_Total_Takedown_Percentage',
