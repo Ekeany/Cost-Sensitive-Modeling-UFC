@@ -161,6 +161,29 @@ def calculate_variance_from_mean_in_odds(df, fighter, red_column ,blue_column):
     return varience_storage
 
 
+
+def average_odd(df, fighter, red_column ,blue_column):
+    
+    average_odds_fighter    = [extract_stats(df.iloc[0], fighter, red_column, blue_column, opponent=False)]
+    average_odds_opponenet  = [extract_stats(df.iloc[0], fighter, red_column, blue_column, opponent=True)]
+
+    for row in range(1,len(df)):
+        
+        df_slice = df.loc[:row,:].copy()
+
+        stats_fighter   = [extract_stats(row_, fighter, red_column, blue_column, opponent=False) for index, row_ in df_slice.iterrows()]
+        stats_opponenet = [extract_stats(row_, fighter, red_column, blue_column, opponent=True) for index, row_ in df_slice.iterrows()]
+
+        mean_fighter = sum(stats_fighter[:-1])/len(stats_fighter[:-1])
+        mean_opponenet = sum(stats_opponenet[:-1])/len(stats_opponenet[:-1])
+
+        average_odds_fighter.append(mean_fighter)
+        average_odds_opponenet.append(mean_opponenet)
+
+    return average_odds_fighter, average_odds_opponenet
+
+
+
 def which_fighter_won(df, fighter):
 
     if df.R_fighter == fighter and df.Winner == 'Red':
@@ -259,6 +282,7 @@ def feature_engineering_fighter_level_loop(df):
     average_strikes_or_grapple = []; opp_log_striking_ratio = []
     opponents_avg_strikes_or_grapple = []; opp_log_of_striking_defense = []
     odds_varience = []; finish_ratio = []
+    average_fighter_odds = []; average_opponent_odds = []
 
 
     df = df.sort_values(by='date', ascending=True)
@@ -296,6 +320,13 @@ def feature_engineering_fighter_level_loop(df):
         # average fight time
         avg_fight_time = fights['total_fight_time'].expanding(2).mean()
         average_fight_time = average_fight_time + list(avg_fight_time.values)
+
+
+        # average odds of fighter and opponent
+        avg_fighter_odds, avg_opponent_odds = average_odd(fights, fighter, 'red_fighter median', 'blue_fighter median')
+        average_fighter_odds = average_fighter_odds + avg_fighter_odds
+        average_opponent_odds = average_opponent_odds + avg_opponent_odds
+
 
         # wining streak and losing streak
         wins = fights.apply(lambda x: streaks_who_won(x,fighter),axis=1)
@@ -466,4 +497,6 @@ def feature_engineering_fighter_level_loop(df):
                         'opponents_avg_strikes_or_grapple':opponents_avg_strikes_or_grapple,
                         'opp_log_striking_ratio':opp_log_striking_ratio,
                         'opp_log_of_striking_defense':opp_log_of_striking_defense,
-                        'odds_varience':odds_varience, 'finish_ratio':finish_ratio}))
+                        'odds_varience':odds_varience, 'finish_ratio':finish_ratio,
+                        'average_fighter_odds':average_fighter_odds,
+                        'average_opponent_odds':average_opponent_odds}))

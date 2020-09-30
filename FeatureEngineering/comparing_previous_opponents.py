@@ -6,8 +6,8 @@ from PreProcessing.Imputer import Imputer
 from ModelProcessing.GetDifferenceBetweenFighterAttributes import GetTheDifferenceBetweenFighterAttributes
 
 
-subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 'Average_Odds_f1', 'Average_Odds_f2',
-                   'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
+subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 
+                   'red_fighters_elo','blue_fighters_elo','Winner',
                    'R_Fight_Number', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio', 
                    'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts',
                    'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
@@ -15,7 +15,8 @@ subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_cla
                    'R_Average_Num_Takedowns','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
                    'R_win_by_KO/TKO', 'R_win_by_Submission', 'R_win_by_TKO_Doctor_Stoppage','R_Power_Rating','red_skill',
                    'wrestling_red_skill','striking_red_skill','g_and_p_red_skill', 'jiujitsu_red_skill', 'grappling_red_skill',
-                   'R_Log_Striking_Defense', 
+                   'R_Log_Striking_Defense', 'red_fighter median', 'blue_fighter median', 'B_avg_opp_CLINCH_landed', 'R_avg_opp_CLINCH_landed',
+                   'R_avg_GROUND_landed','B_avg_GROUND_landed',
                    'B_Fight_Number',
                    'B_Height_cms','B_Reach_cms', 'B_age','B_WinLossRatio','B_RingRust','B_Winning_Streak', 
                    'B_Losing_Streak','B_AVG_fight_time', 'B_total_title_bouts','B_Takedown_Defense', 'B_Takedown Accuracy', 
@@ -26,11 +27,12 @@ subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_cla
                    'g_and_p_blue_skill', 'jiujitsu_blue_skill', 'grappling_blue_skill',
                    'B_Log_Striking_Defense']
 
-cols_to_keep_whole = ['R_fighter','B_fighter','date', 'Average_Odds_f1', 'Average_Odds_f2',
+cols_to_keep_whole = ['R_fighter','B_fighter','date', 
                     'win_by','weight_class','Winner','R_win_by_Decision_Majority','R_win_by_Decision_Split', 'R_win_by_Decision_Unanimous',
                     'R_win_by_KO/TKO', 'R_win_by_Submission','R_win_by_TKO_Doctor_Stoppage','B_win_by_Decision_Majority',
                     'B_win_by_Decision_Split', 'B_win_by_Decision_Unanimous','B_win_by_KO/TKO', 'B_win_by_Submission',
                     'B_win_by_TKO_Doctor_Stoppage']
+
 
 
 def Impute_median(df, cols, group='weight_class'):
@@ -54,7 +56,7 @@ def BasicFeatureEngineeringFromInferenceInModelBuilding(df, subset_cols, cols_to
 
     difference = GetTheDifferenceBetweenFighterAttributes(cleaned_df)
     difference.get_difference_between_fighters_stats(cols_to_keep_whole=cols_to_keep_whole)
-    difference.drop_solo_columns()
+    #difference.drop_solo_columns()
     df = difference.get_data()
 
     return df
@@ -63,17 +65,15 @@ def BasicFeatureEngineeringFromInferenceInModelBuilding(df, subset_cols, cols_to
 
 def Normalize_Features(df, subset_cols, cols_to_keep_whole):
 
-    df = df.copy()
-    cols = ['difference_Fighter_Odds','difference_Log_Striking_Ratio',
-    'difference_Log_Striking_Defense', 'difference_age', 'difference_RingRust',
-    'striking_difference_skill','difference_fighters_elo','difference_Takedown_Defense',
-    'wrestling_difference_skill','difference_Power_Rating','g_and_p_difference_skill',
-    'jiujitsu_difference_skill','R_win_by_KO/TKO', 'B_win_by_KO/TKO']
+    cols =  ['R_Log_Striking_Defense', 'B_Log_Striking_Defense', 'red_fighter median', 'blue_fighter median',
+            'B_avg_opp_CLINCH_landed', 'R_avg_opp_CLINCH_landed','R_avg_GROUND_landed','B_avg_GROUND_landed',
+            'wrestling_red_skill', 'wrestling_blue_skill', 'B_age','R_age']
 
 
     # get the difference between cols
     df = BasicFeatureEngineeringFromInferenceInModelBuilding(df, subset_cols, cols_to_keep_whole)
 
+    print(df.columns.to_list())
     # Drop col to merge back on
     norm = StandardScaler().fit_transform(df[cols].values)
     df.drop(cols, inplace=True, axis=1)
@@ -88,21 +88,13 @@ def Normalize_Features(df, subset_cols, cols_to_keep_whole):
 def get_stats_of_previous_fighters_who_they_beat(df, fighter):
 
 
-    blue_cols = [df['difference_Fighter_Odds'], df['difference_Log_Striking_Ratio'],
-                df['difference_Log_Striking_Defense'],  df['difference_age'],
-                df['difference_RingRust'], df['striking_difference_skill'],
-                df['difference_fighters_elo'],  df['difference_Takedown_Defense'],
-                df['wrestling_difference_skill'],  df['difference_Power_Rating'],
-                df['g_and_p_difference_skill'], df['jiujitsu_difference_skill'],
-                df['B_win_by_KO/TKO']]
+    blue_cols = [df['B_Log_Striking_Defense'], df['blue_fighter median'],
+                df['B_Log_Striking_Defense'],  df['B_age'],
+                df['B_avg_opp_CLINCH_landed'], df['B_avg_GROUND_landed']]
 
-    red_cols  = [df['difference_Fighter_Odds'], df['difference_Log_Striking_Ratio'],
-                df['difference_Log_Striking_Defense'],  df['difference_age'],
-                df['difference_RingRust'], df['striking_difference_skill'],
-                df['difference_fighters_elo'],  df['difference_Takedown_Defense'],
-                df['wrestling_difference_skill'],  df['difference_Power_Rating'],
-                df['g_and_p_difference_skill'], df['jiujitsu_difference_skill'],
-                df['R_win_by_KO/TKO']]
+    red_cols  = [df['R_Log_Striking_Defense'], df['red_fighter median'],
+                df['R_Log_Striking_Defense'],  df['R_age'],
+                df['R_avg_opp_CLINCH_landed'], df['R_avg_GROUND_landed']]
 
 
     if df.R_fighter == fighter and df.Winner == 'Red':

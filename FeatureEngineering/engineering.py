@@ -68,14 +68,6 @@ class Engineering:
 
 
         try:
-            self.odds = pd.read_csv(self.BASE_PATH/'data/raw_fighter_odds.csv', parse_dates=['Date'])[['Fighter_one','Fighter_two','Average_Odds_f1','Average_Odds_f2','Date']]
-            self.odds.Average_Odds_f1 = pd.to_numeric(self.odds.Average_Odds_f1)
-            self.odds.Average_Odds_f2 = pd.to_numeric(self.odds.Average_Odds_f2)
-        except:
-            raise FileNotFoundError('Cannot find the data/raw_fighter_odds.csv')
-
-
-        try:
             self.best_fight_odds = pd.read_csv(self.BASE_PATH/'data/best_fight_odds.csv', parse_dates=['Date']) 
 
         except:
@@ -113,7 +105,6 @@ class Engineering:
 
     def create_merge_cols(self):
 
-        self.odds = self.create_a_merge_column(self.odds, 'Fighter_one', 'Fighter_two', 'Date')
         self.fights = self.create_a_merge_column(self.fight, 'R_fighter', 'B_fighter', 'date')
         self.raw_fight = self.create_a_merge_column(self.raw_fight, 'R_fighter', 'B_fighter', 'date')
         self.best_fight_odds = self.create_a_merge_column(self.best_fight_odds, 'fighter1', 'fighter2', 'Date')
@@ -122,17 +113,6 @@ class Engineering:
     def merge_files(self):
 
         self.create_merge_cols()
-        self.fights_and_odds = self.fights.merge(self.odds,on='merge')
-
-        # swap columns when needed
-        self.fights_and_odds.Average_Odds_f1, self.fights_and_odds.Average_Odds_f2 = (np.where(self.fights_and_odds.R_fighter == self.fights_and_odds.Fighter_one, 
-                                                                             [self.fights_and_odds.Average_Odds_f1, self.fights_and_odds.Average_Odds_f2], 
-                                                                             [self.fights_and_odds.Average_Odds_f2, self.fights_and_odds.Average_Odds_f1]))
-
-
-        self.fights_and_odds['red_Fighter_Odds']   = self.fights_and_odds.Average_Odds_f1.apply(lambda x: convert_american_odds_to_perecentage(x))
-        self.fights_and_odds['blue_Fighter_Odds']  = self.fights_and_odds.Average_Odds_f2.apply(lambda x: convert_american_odds_to_perecentage(x))
-
         
         raw_fight_selected = self.raw_fight[['win_by','total_fight_time','B_GROUND','R_GROUND','B_CLINCH','R_CLINCH','B_DISTANCE',
                                             'R_DISTANCE','B_LEG','R_LEG','B_BODY','R_BODY','B_HEAD','R_HEAD','B_REV','R_REV',
@@ -141,7 +121,7 @@ class Engineering:
                                             'B_KD','R_KD','merge']]
 
 
-        self.fights_and_odds = self.fights_and_odds.merge(raw_fight_selected, on = 'merge')
+        self.fights_and_odds = self.fight.merge(raw_fight_selected, on = 'merge')
         self.fights_and_odds = self.fights_and_odds.merge(self.best_fight_odds, on = 'merge',
                                                           how='left', suffixes=('', '_y'))
 
@@ -150,7 +130,7 @@ class Engineering:
 
         # drop duplicates two odds for same fight
         self.fights_and_odds.drop_duplicates(subset=['merge'], keep='first',inplace=True)
-        self.fights_and_odds.drop(['merge','Fighter_one','Fighter_two','Date',
+        self.fights_and_odds.drop(['merge','Date',
                               'Referee','location'], inplace = True, axis = 1)
 
     
@@ -280,7 +260,9 @@ class Engineering:
                                                           'opp_log_striking_ratio':'R_opp_log_striking_ratio',
                                                           'opp_log_of_striking_defense':'R_opp_log_of_striking_defense',
                                                           'odds_varience':'R_odds_varience',
-                                                          'finish_ratio':'R_finish_ratio'}).set_index('Index')
+                                                          'finish_ratio':'R_finish_ratio',
+                                                          'average_fighter_odds' : 'R_average_fighter_odds',
+                                                          'average_opponent_odds': 'R_average_opponent_odds'}).set_index('Index')
 
         red.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
 
@@ -308,7 +290,9 @@ class Engineering:
                                                           'opp_log_striking_ratio':'B_opp_log_striking_ratio',
                                                           'opp_log_of_striking_defense':'B_opp_log_of_striking_defense',
                                                           'odds_varience':'B_odds_varience',
-                                                          'finish_ratio':'B_finish_ratio'}).set_index('Index')
+                                                          'finish_ratio':'B_finish_ratio',
+                                                          'average_fighter_odds' : 'B_average_fighter_odds',
+                                                          'average_opponent_odds': 'B_average_opponent_odds'}).set_index('Index')
 
 
         blue.drop(['Blue_or_Red','Fighters'], inplace=True,axis=1)
@@ -426,8 +410,8 @@ class Engineering:
     def calculate_average_distance_of_opponent_to_previous_wins_loses(self):
 
 
-        subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 'Average_Odds_f1', 'Average_Odds_f2',
-                   'red_fighters_elo','blue_fighters_elo','red_Fighter_Odds','blue_Fighter_Odds','Winner',
+        subset_cols = ['R_fighter','B_fighter','date','title_bout', 'win_by','weight_class', 
+                   'red_fighters_elo','blue_fighters_elo','Winner',
                    'R_Fight_Number', 'R_Height_cms', 'R_Reach_cms', 'R_age', 'R_WinLossRatio', 
                    'R_RingRust','R_Winning_Streak','R_Losing_Streak','R_AVG_fight_time','R_total_title_bouts',
                    'R_Takedown_Defense', 'R_Takedown Accuracy','R_Strikes_Per_Minute', 'R_Log_Striking_Ratio' , 'R_Striking Accuracy',
@@ -449,7 +433,7 @@ class Engineering:
                    'B_Log_Striking_Defense']
 
 
-        cols_to_keep_whole = ['R_fighter','B_fighter','date', 'Average_Odds_f1', 'Average_Odds_f2',
+        cols_to_keep_whole = ['R_fighter','B_fighter','date', 
                     'win_by','weight_class','Winner','R_win_by_Decision_Majority','R_win_by_Decision_Split', 'R_win_by_Decision_Unanimous',
                     'R_win_by_KO/TKO', 'R_win_by_Submission','R_win_by_TKO_Doctor_Stoppage','B_win_by_Decision_Majority',
                     'B_win_by_Decision_Split', 'B_win_by_Decision_Unanimous','B_win_by_KO/TKO', 'B_win_by_Submission',
@@ -484,7 +468,8 @@ class Engineering:
 
     def subset_features(self):
         
-        self.subset = self.shifted_elos_and_features[['Average_Odds_f1', 'Average_Odds_f2','B_AVG_fight_time', 'B_Average_Num_Takedowns',
+        self.subset = self.shifted_elos_and_features[['Converted_red_fighter mean',  'Converted_red_fighter median',
+                                                    'Converted_blue_fighter mean', 'Converted_blue_fighter median', 'B_AVG_fight_time', 'B_Average_Num_Takedowns',
                                                     'B_Beaten_Names','B_Beaten_Similar','B_Fight_Number', 'B_Height_cms', 'B_Log_Striking_Defense',
                                                     'B_Log_Striking_Ratio','B_Losing_Streak','B_Lost_to_names','B_Power_Rating','B_Reach_cms',
                                                     'B_RingRust','B_Stance','B_Stats_of_Opponents_they_have_beaten','B_Stats_of_Opponents_they_have_lost_to',
@@ -505,6 +490,7 @@ class Engineering:
                                                     'B_opp_log_of_striking_defense','B_opp_log_striking_ratio','B_opponents_avg_strikes_or_grapple','B_total_rounds_fought','B_total_time_fought(seconds)','B_total_title_bouts',
                                                     'B_win_by_Decision_Majority','B_win_by_Decision_Split','B_win_by_Decision_Unanimous','B_win_by_KO/TKO','B_win_by_Submission',
                                                     'B_win_by_TKO_Doctor_Stoppage','B_wins','B_finish_ratio',
+                                                    'B_average_fighter_odds','B_average_opponent_odds',
                                                     'R_AVG_fight_time','R_Average_Num_Takedowns','R_Beaten_Names','R_Beaten_Similar','R_Fight_Number','R_Height_cms',
                                                     'R_Log_Striking_Defense','R_Log_Striking_Ratio','R_Losing_Streak','R_Lost_to_names','R_Power_Rating',
                                                     'R_Reach_cms','R_RingRust','R_Stance','R_Stats_of_Opponents_they_have_beaten','R_Stats_of_Opponents_they_have_lost_to',
@@ -525,7 +511,8 @@ class Engineering:
                                                     'R_opp_log_of_striking_defense','R_opp_log_striking_ratio','R_opponents_avg_strikes_or_grapple','R_total_rounds_fought',
                                                     'R_total_time_fought(seconds)','R_total_title_bouts','R_win_by_Decision_Majority','R_win_by_Decision_Split','R_win_by_Decision_Unanimous',
                                                     'R_win_by_KO/TKO','R_win_by_Submission','R_win_by_TKO_Doctor_Stoppage','R_wins','Winner','R_finish_ratio',
-                                                    'blue_Fighter_Odds',
+                                                    'R_average_fighter_odds','R_average_opponent_odds',
+                                            
                                                     'blue_fighter mean','blue_fighter median','blue_fighter max','blue_fighter wins by decision mean','blue_fighter wins by decision median',
                                                     'blue_fighter wins by decision max','blue_fighter wins by submission mean','blue_fighter wins by submission median','blue_fighter wins by submission max',
                                                     'blue_fighter wins by tko/ko mean','blue_fighter wins by tko/ko median','blue_fighter wins by tko/ko max','blue_fighter wins in round 1 mean',
@@ -534,7 +521,7 @@ class Engineering:
                                                     'blue_fighters_elo','blue_skill','blue_stamina','date','fight_weight','g_and_p_blue_skill','g_and_p_red_skill','grappling_blue_skill',
                                                     'grappling_red_skill','jiujitsu_blue_skill','jiujitsu_red_skill','log_defense_blue_skill','log_defense_red_skill',
                                                     'log_striking_blue_skill','log_striking_red_skill','over 2½ rounds mean','over 2½ rounds median',
-                                                    'over 2½ rounds max','red_Fighter_Odds',
+                                                    'over 2½ rounds max',
                                                     'red_fighter mean','red_fighter median','red_fighter max','red_fighter wins by decision mean','red_fighter wins by decision median',
                                                     'red_fighter wins by decision max','red_fighter wins by submission mean','red_fighter wins by submission median','red_fighter wins by submission max','red_fighter wins by tko/ko mean',
                                                     'red_fighter wins by tko/ko median','red_fighter wins by tko/ko max','red_fighter wins in round 1 mean','red_fighter wins in round 1 median','red_fighter wins in round 1 max',

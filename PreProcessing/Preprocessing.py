@@ -43,7 +43,7 @@ class Preprocessing:
     def Read_files(self):
 
         try:
-            self.fights = pd.read_csv(self.BASE_PATH/'data/total_fight_data.csv', sep=';')
+            self.fights = pd.read_csv(self.BASE_PATH/'data/total_fight_data.csv')
         
         except:
             raise FileNotFoundError('Cannot find the data/total_fight_data.csv')

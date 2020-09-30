@@ -4,8 +4,10 @@ from urllib.request import urlopen
 from typing import 	List, Dict, Tuple
 from pathlib import Path
 import os
+import pandas as pd
 from createdata.print_progress import print_progress
 from createdata.make_soup import make_soup
+
 
 HEADER: str = 'R_fighter;B_fighter;R_KD;B_KD;R_SIG_STR.;B_SIG_STR.\
 ;R_SIG_STR_pct;B_SIG_STR_pct;R_TOTAL_STR.;B_TOTAL_STR.;R_TD;B_TD;R_TD_pct\
@@ -13,6 +15,7 @@ HEADER: str = 'R_fighter;B_fighter;R_KD;B_KD;R_SIG_STR.;B_SIG_STR.\
 ;B_BODY;R_LEG;B_LEG;R_DISTANCE;B_DISTANCE;R_CLINCH;B_CLINCH;R_GROUND;B_GROUND\
 ;win_by;last_round;last_round_time;Format;Referee;date;location;Fight_type;Winner\n'
 BASE_PATH = Path(os.getcwd())/'data'
+
 
 def get_fight_stats(fight_soup: BeautifulSoup) -> str:
 	tables = fight_soup.findAll('tbody')
@@ -94,11 +97,13 @@ def get_total_fight_stats(event_and_fight_links: Dict[str, List[str]]) -> str:
 		event_info = get_event_info(event_soup)
 
 		for fight in fights:
+			
 			try:
 				fight_soup = make_soup(fight)
 				fight_stats = get_fight_stats(fight_soup)
 				fight_details = get_fight_details(fight_soup)
 				result_data = get_fight_result_data(fight_soup)
+			
 			except Exception as e:
 				continue
 			
@@ -115,12 +120,44 @@ def get_total_fight_stats(event_and_fight_links: Dict[str, List[str]]) -> str:
 	return total_stats
 
 
+def save_string_to_csv(string, filename, header: str = HEADER):
+
+	with open(filename.as_posix(), 'wb') as file:
+			file.write(bytes(header, encoding='ascii', errors='ignore'))
+			file.write(bytes(string, encoding='ascii', errors='ignore'))
+
+	return None
+
+
+def convert_to_structured_data(input_data:str, header:list=HEADER) -> pd.DataFrame:
+
+    structured_data = []
+    for row in input_data.split('\n'):
+        structured_data.append(row.split(';'))
+
+    return pd.DataFrame(structured_data, columns=HEADER.replace('\n','').split(';'))
+
+
 def create_fight_data_csv(event_and_fight_links: Dict[str, List[str]], 
-						filename: str = 'total_fight_data.csv', header: str = HEADER) -> None:
+						filename: str = 'total_fight_data.csv') -> None:
 	
 	CSV_PATH = BASE_PATH/filename
-	assert CSV_PATH.exists()!=True, 'filename exists'
-	total_stats = get_total_fight_stats(event_and_fight_links)
-	with open(CSV_PATH.as_posix(), 'wb') as file:
-		file.write(bytes(header, encoding='ascii', errors='ignore'))
-		file.write(bytes(total_stats, encoding='ascii', errors='ignore'))
+
+	if CSV_PATH.exists() != True:
+		
+		total_stats = get_total_fight_stats(event_and_fight_links)
+		data = convert_to_structured_data(total_stats)
+		data.to_csv(CSV_PATH, index=False)
+
+	elif event_and_fight_links is not None:
+		past_fight_data = pd.read_csv(CSV_PATH)
+		total_stats = get_total_fight_stats(event_and_fight_links)
+
+		new_fight_data = convert_to_structured_data(total_stats)
+		latest_fight_data = pd.concat([new_fight_data, past_fight_data],
+                                     ignore_index=True, sort=False)
+
+		latest_fight_data.to_csv(CSV_PATH, index=False)
+
+	else:
+		pass
