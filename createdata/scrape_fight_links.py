@@ -81,6 +81,7 @@ def get_event_and_fight_links(event_links: pd.DataFrame) -> Dict[str, List[str]]
 			event_fights.append(href)
 		event_and_fight_links[link] = event_fights
 
+
 	pickle_out = open(EVENT_AND_FIGHT_LINKS_PATH.as_posix(),"wb")
 	pickle.dump(event_and_fight_links, pickle_out)
 	pickle_out.close()

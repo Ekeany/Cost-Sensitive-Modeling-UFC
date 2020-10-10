@@ -128,8 +128,11 @@ def pickle_load(filename):
 def create_get_odds_urls(filename: str = 'bestfightodds_urls.pickle') -> None:
     
     BASE_PATH = Path(os.getcwd())/'data'
+    # future event
     FUTURE_EVENT_LINKS_PATH = BASE_PATH/'future_event_link.pickle'
+    # past events
     PAST_EVENT_LINKS_PATH = BASE_PATH/'past_event_links.pickle'
+    
     ODDS_URLS_PATH   = BASE_PATH/filename
     FUTURE_URLS_PATH = BASE_PATH/'future_bestfightodds_urls.pickle'
     

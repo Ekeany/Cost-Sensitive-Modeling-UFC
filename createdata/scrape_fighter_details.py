@@ -93,7 +93,6 @@ def check_for_existing_fighter_links_file(latest_name_links, past_name_details):
 
 	names = list(set(latest_names) - set(past_names))
 
-	
 	if len(names) > 0:
 		latest_names = {name:latest_name_links[name] for name in names}
 		return latest_names

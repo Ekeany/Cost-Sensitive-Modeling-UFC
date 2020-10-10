@@ -1,0 +1,38 @@
+demographic variables:
+weight class
+age
+reach
+stance
+analyzed minutes
+country of origin
+team
+Stamina
+RingRust
+
+striking variables:
+Knockdown ratio (Scored/recieved)
+knockdown rate number of knockdowns per strikes landed
+head striking accuracy
+Total Striking Ratio LOG
+
+chin ratio of head strikes taken to knockdowns
+Total striking defenese LOG
+Head defense
+
+Significant Strikes Attempted per Minute
+Significant Strking Accuracy
+
+
+Grappling:
+Ground Advances per Takedown
+Reversels per Opponent Takedown
+Average ground Strikes per Takedown
+
+Takedown Success Rate
+Takedown per Minute
+Opponent takedown attempts per minute
+Submission attempts per trip to the ground
+
+
+
+
