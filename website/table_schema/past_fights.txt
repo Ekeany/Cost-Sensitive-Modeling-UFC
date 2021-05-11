@@ -1,0 +1,4 @@
+event_id, red_fighter_name, blue_fighter_name, red_fighter_odds, blue_fighter_odds, red_fighter_pred, blue_fighter_pred, ROI, winner
+1,'Kelvin Gastelum','Robert Whittaker',216,-216,0.73,0.27,112,1
+1,'Chase Sherman','Andre Arlovski',216,-216,0.60,0.4,112,0
+1,'Jon Jones','Daniel Cormeir',-160,160,0.73,0.27,127,1

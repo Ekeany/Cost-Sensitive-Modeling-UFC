@@ -1,0 +1,2 @@
+event_id, Expected_Returns, num_fights_predicted, num_total_fights
+1,125,6,8

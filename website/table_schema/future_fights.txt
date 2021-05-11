@@ -1,0 +1,4 @@
+red_fighter_name, blue_fighter_name, red_fighter_odds, blue_fighter_odds, prediction_made, red_fighter_pred, blue_fighter_pred, expected_return
+'Kelvin Gastelum','Robert Whittaker',216,-216,True,0.73,0.27,125
+'Chase Sherman','Andre Arlovski',120,-300,True,0.6,0.4,200
+'Alex Munoz','Luis Pena',150,-200,False,0,0,0
