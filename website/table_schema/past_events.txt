@@ -1,4 +1,4 @@
-event_id,accuracy,ROI,num_fights,date, total_num_fights
-1,72,120,7,10/12/2020,10
-2,60,105,8,11/11/2020,10
-3,68,110,4,15/10/2020,10
+event_id,event_name,accuracy,ROI,num_fights,date, total_num_fights
+1,'UFC Fight Night Whitticker vs Jones',72,120,7,10/12/2020,10
+2,'UFC Fight Night Jones vs Benny',60,105,8,11/11/2020,10
+3,'UFC Fight Night Nate Diaz vs Jorge Masividal',68,110,4,15/10/2020,10
