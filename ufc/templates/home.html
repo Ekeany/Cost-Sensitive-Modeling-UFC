@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/mcgregor_money_floyd.jpg"%})">
+<div class="row blank-row">
+</div>
+    <div class="row my-row">
+        <div class="col-lg-5 my-col">
+            <h1 class="text-success"> Mystic Mac </h1>
+             <h4>Leveraging machine learning to make a profit. Unlike most this model has not only been trained to predict the outcome of each fight but been purely optimized for profit </h4>
+            <br>
+            <!-- add in links for events -->
+            <a href="/future-events" button type="button" class="btn btn-outline-success">Future Events</button></a>
+            <a href="#" button type="button" class="btn btn-outline-success">Past Events</button></a>
+        </div>
+    </div>
+    <div class="row justify-content-around">
+    <!-- Stats to be added  -->
+        <div class="col-lg-3" align="center">
+            <h2> Accuracy 72%</h2>
+            <p>The historical accuracy of our model. We expect for every 100 fights we make a prediction for 72 of them will be correct</p>
+        </div>
+        <div class="col-lg-3" align="center">
+            <h2> Return on Investment 250%</h2>
+            <p>Our Model was optimized for profit instead of accuracy as favourites don't make money. For the year of 2020, the return on our investments has been 250%. So, if you started with 100 dollars in January, you would now have 250 dollars</p>
+        </div>
+        <div class="col-lg-3" align="center">
+            <h2> Fights Analyzed {{layoutpagestats.fights_analyzed}}</h2>
+            <p>Our Machine Learning Model has been trained on all the historical UFC fights. The model uses a combination of statistical metrics for each fighter along with the market odds to make it's decision</p>
+        </div>
+    </div>
+{% endblock content %}
