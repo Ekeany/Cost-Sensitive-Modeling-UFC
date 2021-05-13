@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% for event in pastEvent %}
+    <div class="row justify-content-center event-row">
+        <div class="col-lg-8 event-col" align="center">
+            <a href="past-event/{{event.id}}"<ul><h1>{{ event.event_name }}</h1></ul></a>
+            <ul><h1>Predicted fights {{ event.num_fights_predicted }} out of total {{ event.num_total_fights }}</h1></ul>
+             <ul><h1>Date: {{ event.event_date }}</h1></ul>
+             <ul><h1>ROI: {{ event.ROI }}</h1></ul>
+             <ul><h1>Accuracy: {{ event.accuracy }}</h1></ul>
+        </div>
+    </div>
+{% endfor %}
+{% endblock content %}
