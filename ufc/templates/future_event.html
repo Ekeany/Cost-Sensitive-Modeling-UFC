@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+<div class="container-fluid event-container">
+{% block content %}
+
+{% for event in futureEvent %}
+    <div class="row justify-content-center event-row">
+        <div class="col-lg-12 event-col" align="center">
+            <h1>{{ event.event_name }}</h1>
+            </div>
+            <div class = "col-lg-3" align="center">
+                <h1>Expected Returns: {{ event.expected_returns }} </h1>
+            </div>
+            <div class = "col-lg-3" align="center">
+                <h1> Predictions for {{ event.num_fights_predicted }} out of {{ event.num_total_fights }} fights</h1>
+            </div>
+    </div>
+{% endfor %}
+
+{% endblock content %}
+</div>
