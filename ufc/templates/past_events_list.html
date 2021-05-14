@@ -2,15 +2,34 @@
 {% load static %}
 
 {% block content %}
+<div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/ufc_octagon.jpg"%})">
+
+<h1 align="center"> Past Events </h1>
+<br>
+<br>
+<h2 align="center"> ------------- INSERT GRAPHS ---------- </h2>
+<br>
+<br>
 {% for event in pastEvent %}
-    <div class="row justify-content-center event-row">
-        <div class="col-lg-8 event-col" align="center">
-            <a href="past-event/{{event.id}}"<ul><h1>{{ event.event_name }}</h1></ul></a>
-            <ul><h1>Predicted fights {{ event.num_fights_predicted }} out of total {{ event.num_total_fights }}</h1></ul>
-             <ul><h1>Date: {{ event.event_date }}</h1></ul>
-             <ul><h1>ROI: {{ event.ROI }}</h1></ul>
-             <ul><h1>Accuracy: {{ event.accuracy }}</h1></ul>
+    <div class="row align-self-center bg-secondary event-row" align="center">
+        <div class="col-lg-12 align-self-center event-col" align="center">
+                <a href="past-event/{{event.id}}"<ul><h3 class="text-light">{{ event.event_name }}</h3></ul></a>
+                </div>
+            <div class="row justify-content-center bg-secondary" align="center">
+            <div class="col-lg-3" align="center">
+                <p>Accuracy {{ event.accuracy }}%</p>
+            </div>
+            <div class="col-lg-3" align="center">
+                <p>Return on Investment {{ event.ROI }}%</p>
+            </div>
+            <div class="col-lg-3" align="center">
+                <p>Number of fights {{ event.num_fights_predicted }}</p>
+            </div>
+            <div class="col-lg-3" align="center">
+                <p>{{ event.event_date }}</p>
+            </div>
+            </div>
         </div>
-    </div>
 {% endfor %}
+</div>
 {% endblock content %}

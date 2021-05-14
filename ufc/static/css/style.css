@@ -5,20 +5,15 @@
   margin-right: 5vw;
   margin-bottom: 10vw;
 }
-
 .event-row{
-  margin-bottom: 10vw;
-  border-style: solid black;
+  border: solid white;
+  border-radius: 25px;
+  margin-bottom: 3vw;
 }
-
-.my-container{
-    min-height: 100%;
-    background-image: "images/mcgregor.jpg";
-  }
-
   .bg-cover {
     background-attachment: static;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: cover;
+    background-size: cover;   
+    height: 100vh;
 }
