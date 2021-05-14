@@ -1,3 +1,8 @@
+body {    
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .blank-row{
     height:12vw;
 }
@@ -10,10 +15,49 @@
   border-radius: 25px;
   margin-bottom: 3vw;
 }
+.event-col{
+ margin-bottom: 1vw;
+}
+
+.fight-row{
+  border: solid white;
+  border-radius: 25px;
+  padding-top: 3vw;
+  margin-bottom: 3vw;
+  width: 50%;
+  background-color: black;
+}
   .bg-cover {
     background-attachment: static;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;   
-    height: 100vh;
+    min-height: 100vh;
+}
+.favourite{
+  background-color:green;
+  width: 60%;
+  border-radius: 10px;
+  border: 0.2px solid white;
+  margin-bottom: 1vw;
+}
+.underdog{
+  background-color:red;
+  width: 60%;
+  border-radius: 10px;
+  border: 0.2px solid white;
+  margin-bottom: 1vw;
+}
+.even{
+  background-color:purple;
+  width: 60%;
+  border-radius: 10px;
+  border: 0.2px solid white;
+  margin-bottom: 1vw;
+}
+
+.win-col{
+  border: 1px dashed green;
+  margin-bottom: 3vw;
+  width: 60%;
 }

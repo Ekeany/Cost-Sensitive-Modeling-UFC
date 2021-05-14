@@ -1,31 +1,103 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
+<!-- Background Image -->
 <div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/octagon_image.jpg"%})">
+
+<!-- Upcoming Events and Stats -->
 {% for event in futureEvent %}
     <div class="row justify-content-center my-row">
         <div class="col-lg-12 event-col" align="center">
             <h1>{{ event.event_name }}</h1>
-         
-
-            </div>
-            <div class = "col-lg-3" align="center">
-                <h1>Expected Returns: <b>{{ event.expected_returns }}%</b> </h1>
-            </div>
-            <div class = "col-lg-3" align="center">
-                <h1> Predictions for {{ event.num_fights_predicted }} out of {{ event.num_total_fights }} fights</h1>
-            </div>
-            <div class = "col-lg-12" align="center">
-          <h1>  Add Fights in here </h1>
-    </div>
+        </div>
+        <div class = "col-lg-3" align="center">
+            <h1>Expected Returns: <b>{{ event.expected_returns }}%</b> </h1>
+        </div>
+        <div class = "col-lg-3" align="center">
+            <h1> Predictions for {{ event.num_fights_predicted }} out of {{ event.num_total_fights }} fights</h1>
+        </div>
     </div>
     {% endfor %}
+
+    <!-- Fight predictions -->
     {% for fight in eventFights %}
-    <div class="row justify-content-center my-row">
-     <div class="col-lg-8 event-col" align="center">
-    <h2>{{fight.red_fighter_name}} vs {{fight.blue_fighter_name}}</h2>
-    <h2>{{fight.red_fighter_odds}}  {{fight.blue_fighter_odds}}</h2>
+    <div class="row justify-content-center" align="center">
+        <div class="row justify-content-center bg-dark fight-row" align="center">
+        <!-- 1 red fighter won 0 blue fighter won and 0.5 was a draw. Is that format okay or is there an easier format-->
+            {% if fight.predicted_winner == 1 %}
+            <div class="col-lg-4 win-col">
+          <p class="text-success"><b>Predicted Winner</b> </p>
+                <h2>{{fight.red_fighter_name}}</h2>
+                    <!-- Colorizing -->
+                {% if fight.blue_fighter_odds < fight.red_fighter_odds%}
+                    <div class="favourite"><h3>{{fight.red_fighter_odds}} Favourite</h3></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h3>{{fight.red_fighter_odds}} Favourite</h3></div>
+                {% else %} 
+                    <div class="underdog"><h3>{{fight.red_fighter_odds}} Underdog</h3></div>
+                {% endif %}
+                    <p>{{fight.red_fighter_pred}} % chance of winning</p>
+            </div>
+            {% else %}
+            <div class="col-lg-4 event-col">
+                <h2>{{fight.red_fighter_name}}</h2>
+                    <!-- Colorizing -->
+                {% if fight.blue_fighter_odds < fight.red_fighter_odds%}
+                    <div class="favourite"><h3>{{fight.red_fighter_odds}} Favourite</h3></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h3>{{fight.red_fighter_odds}} Favourite</h3></div>
+                {% else %} 
+                    <div class="underdog"><h3>{{fight.red_fighter_odds}} Underdog</h3></div>
+                {% endif %}
+                    <p>{{fight.red_fighter_pred}} % chance of winning</p>
+            </div>
+            {% endif %}
+            <div class="col-lg-4 event-col">
+                <h2> vs </h2>
+            </div>
+            <!-- if statement to display who the predicted winner is-->
+            {% if fight.predicted_winner == 0 %}
+            <div class="col-lg-4 win-col">
+            <p class="text-success"><b>Predicted Winner</b> </p>
+                <h2>{{fight.blue_fighter_name}}</h2>
+                <!-- Colorizing -->
+                {% if fight.blue_fighter_odds > fight.red_fighter_odds%}
+                    <div class="favourite"><h3>{{fight.blue_fighter_odds}} Favourite</h3></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h3>{{fight.blue_fighter_odds}} Even</h3></div>
+                {% else %} 
+                    <div class="underdog"><h3>{{fight.blue_fighter_odds}} Underdog</h3></div>
+                {% endif %}
+                    <p> {{fight.blue_fighter_pred}}% chance of winning</p>
+            </div>
+            {% else %}
+                        <div class="col-lg-4 event-col">
+                <h2>{{fight.blue_fighter_name}}</h2>
+                <!-- Colorizing -->
+                {% if fight.blue_fighter_odds > fight.red_fighter_odds%}
+                    <div class="favourite"><h3>{{fight.blue_fighter_odds}} Favourite</h3></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h3>{{fight.blue_fighter_odds}} Even </h3></div>
+                {% else %} 
+                    <div class="underdog"><h3>{{fight.blue_fighter_odds}} Underdog</h3></div>
+                {% endif %}
+                    <p> {{fight.blue_fighter_pred|floatformat}}% chance of winning</p>
+            </div>
+            {% endif %}
+            <div class="col-lg-12" align="center">
+             <!-- if statement to show  -->
+             {% if fight.prediction_made == False%}
+                <div class="even"><h3>Predictions will be made after the weigh ins !</h3></div>
+            {% endif %}
+            </div>
+            <div class="col-lg" align="left">
+                <p>Expected Returns: {{fight.expected_return}}</p>
+            </div>
+            <div class="col-lg" align="right">
+                <p>Why?</p>
+            </div>
+        </div>
     </div>
-    </div>
-{% endfor %}
+    {% endfor %}
 {% endblock content %}
