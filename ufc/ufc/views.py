@@ -6,12 +6,12 @@ from django.contrib.auth.forms import AuthenticationForm #add this
 from django.views import generic
 
 
-class HomePageView(generic.ListView):
-    template_name = 'home.html'
-    
-    # To query upcoming fights?
-    def get_queryset(self):
-        return 
+#class HomePageView(generic.ListView):
+#    template_name = 'home.html'
+#    
+#    # To query upcoming fights?
+#    def get_queryset(self):
+#        return 
     
  
 # Register User method

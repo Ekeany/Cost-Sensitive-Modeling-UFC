@@ -16,14 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from . import views
-from .views import HomePageView
+#from .views import HomePageView
 
 urlpatterns = [
-    path('', HomePageView.as_view(), name='home'),
+  #  path('', HomePageView.as_view(), name='home'),
     path('admin/', admin.site.urls),
     path('register/', views.register_request, name='register'),
     path('login', views.login_request, name='login'),
     path('logout/', views.logout_request, name= 'logout'),
     path('', include('events.urls')),
- 
+    path('', include('home.urls')),
 ]
