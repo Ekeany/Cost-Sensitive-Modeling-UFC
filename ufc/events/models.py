@@ -23,4 +23,17 @@ class Event(models.Model):
     updated = models.DateTimeField(auto_now=True)
     objects = EventManager()
     
-
+class Fight(models.Model):
+    event = models.ForeignKey(Event, related_name='fights', on_delete=models.CASCADE)
+    red_fighter_name = models.CharField(max_length=255, blank="False")
+    blue_fighter_name = models.CharField(max_length=255, blank="False")
+    red_fighter_odds = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    blue_fighter_odds = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    # Not sure what field to make prediction
+    prediction_made = models.BooleanField(default=True)
+    red_fighter_pred = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    blue_fighter_pred = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    expected_return = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    ROI = models.DecimalField(default=0, max_digits=5, decimal_places=2)
+    # Not sure what field to make winner
+    winner = models.IntegerField(default='null', blank="True")
