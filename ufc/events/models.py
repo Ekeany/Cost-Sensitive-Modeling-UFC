@@ -9,7 +9,8 @@ class EventManager(models.Manager):
     # Query to get past events using future boolean
     def is_past(self):
         return self.get_queryset().filter(future=False)
-        
+
+# Model for future and past events linked to each event         
 class Event(models.Model):
     future = models.BooleanField(default=True)
     event_name = models.CharField(max_length=255, blank="False")
@@ -22,7 +23,8 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     objects = EventManager()
-    
+
+# Model for future and past fights linked to each event 
 class Fight(models.Model):
     event = models.ForeignKey(Event, related_name='fights', on_delete=models.CASCADE)
     red_fighter_name = models.CharField(max_length=255, blank="False")
@@ -30,10 +32,11 @@ class Fight(models.Model):
     red_fighter_odds = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     blue_fighter_odds = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     # Not sure what field to make prediction
-    prediction_made = models.BooleanField(default=True)
+    prediction_made = models.BooleanField(default=False)
     red_fighter_pred = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     blue_fighter_pred = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     expected_return = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     ROI = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     # Not sure what field to make winner
-    winner = models.IntegerField(default='null', blank="True")
+    predicted_winner = models.DecimalField(max_digits=2, decimal_places=1, default=None, blank=True, null=True)
+    winner = models.DecimalField(max_digits=2, decimal_places=1, default=None, blank=True, null=True)
