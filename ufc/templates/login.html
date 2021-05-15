@@ -1,19 +1,23 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}      
 
 {% load crispy_forms_tags %}
 
 <!--Login--> 
-<div class="container py-5">
+<div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/ufc_octagon.jpg"%})">
+
+<div class="login input-lg">
+
   <h1>Login</h1>
   <form method="POST">
     {% csrf_token %}
     {{ login_form|crispy }}
     <br>
-    <button class="btn btn-primary" type="submit">Login</button>
+    <button class="btn btn-success" type="submit">Login</button>
   </form>
-  <p class="text-center">Don't have an account? <a href="/register">Create an account</a>.</p>
+  <br>
+  <p class="text-center">Don't have an account? <a class="text-success" href="/register">Create an account</a>.</p>
 </div>
 
 {% endblock content %}

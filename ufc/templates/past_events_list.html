@@ -7,29 +7,32 @@
 <h1 align="center"> Past Events </h1>
 <br>
 <br>
+<div class="graphs">
+<!-- Can add the charts using Chart.js -->
 <h2 align="center"> ------------- INSERT GRAPHS ---------- </h2>
+</div>
 <br>
 <br>
+<div class="events_list" align="center">
 {% for event in pastEvent %}
-    <div class="row align-self-center bg-secondary event-row" align="center">
-        <div class="col-lg-12 align-self-center event-col" align="center">
+    <div class="row justify-content-center event-row" align="center">
+            <div class="col-lg-12 align-self-center" align="center">
                 <a href="past-event/{{event.id}}"<ul><h3 class="text-light">{{ event.event_name }}</h3></ul></a>
-                </div>
-            <div class="row justify-content-center bg-secondary" align="center">
-            <div class="col-lg-3" align="center">
-                <p>Accuracy {{ event.accuracy }}%</p>
             </div>
-            <div class="col-lg-3" align="center">
-                <p>Return on Investment {{ event.ROI }}%</p>
+            <div class="col" align="center">
+                <p>Accuracy {{ event.accuracy|floatformat }}%</p>
             </div>
-            <div class="col-lg-3" align="center">
+            <div class="col" align="center">
+                <p>Return on Investment {{ event.ROI|floatformat }}%</p>
+            </div>
+            <div class="col" align="center">
                 <p>Number of fights {{ event.num_fights_predicted }}</p>
             </div>
-            <div class="col-lg-3" align="center">
+            <div class="col" align="center">
                 <p>{{ event.event_date }}</p>
             </div>
             </div>
-        </div>
 {% endfor %}
 </div>
+        </div>
 {% endblock content %}

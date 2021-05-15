@@ -7,12 +7,13 @@ from .models import Fight
 # View to display the upcoming event
 def future_event(request):
     futureEvent = Event.objects.is_next()
+    
     for event in futureEvent:
         eventFights = event.fights.all()
     return render(request,
                 'future_event.html',
                 {'futureEvent': futureEvent,
-                 'eventFights': eventFights})
+                 'eventFights': eventFights })
 
 # View to display the list of past events
 def past_events_list(request):

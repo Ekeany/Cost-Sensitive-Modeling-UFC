@@ -6,15 +6,15 @@
     <meta charset="utf-8">
     <title>{% block title %}Mystic Mac{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
        
 </head>
 
 <body>
     <header>
-        <!-- Fixed navbar -->
+      <!-- Fixed navbar -->
         <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4\
      bg-white border-bottom shadow-sm">
             <a href="/" class="navbar-brand my-0 mr-md-auto font-weight-normal"
@@ -30,21 +30,32 @@
       <li class="nav-item">
         <a class="nav-link" href="#">Welcome, {{user.username}}</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/future-event">Future Event</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/past-event">Past Events</a>
+      </li>
 
       {% else %}
 
       <li class="nav-item">
         <a class="nav-link" href="/login">Login</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/register">Register</a>
+      </li>
 
       {% endif %}
     </ul>
             </nav>
-        </div>
+        </div> 
     </header>
     <div class="container-fluid my-container" >
+        {% spaceless %}
     {% block content %}
     {% endblock content %}
+    {% endspaceless %}
     </div>
 </body>
 

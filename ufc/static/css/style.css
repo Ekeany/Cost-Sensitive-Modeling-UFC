@@ -2,6 +2,15 @@ body {
   margin: 0 !important;
   padding: 0 !important;
 }
+.my-container{
+  margin: 0;
+  padding: 0;
+}
+.login{
+  margin-top: 5vw;
+  width:100%;
+  text-align: center;
+}
 
 .blank-row{
     height:12vw;
@@ -14,25 +23,53 @@ body {
   border: solid white;
   border-radius: 25px;
   margin-bottom: 3vw;
-}
-.event-col{
- margin-bottom: 1vw;
+  width: 40%;
+  background-image: radial-gradient(closest-side at 50% 50%,rgb(58, 58, 58), black)
 }
 
+.event-col{
+  margin-bottom: 3vw;
+}
+
+.graphs{
+  margin: 8vw;
+}
 .fight-row{
   border: solid white;
   border-radius: 25px;
+  padding: 1vw 3vw 0;
   padding-top: 3vw;
   margin-bottom: 3vw;
   width: 50%;
-  background-color: black;
+  background-image: radial-gradient(closest-side at 50% 50%,rgb(58, 58, 58), black)
+
 }
-  .bg-cover {
+.win-row{
+  border: solid green;
+  border-radius: 25px;
+  padding: 1vw 3vw 0;
+  margin-bottom: 3vw;
+  width: 50%;
+  background-image: radial-gradient(closest-side at 50% 50%,rgb(58, 58, 58), black)
+
+}
+.lose-row{
+  border: solid red;
+  border-radius: 25px;
+  padding: 1vw 3vw 0;
+  margin-bottom: 3vw;
+  width: 50%;
+  background-image: radial-gradient(closest-side at 50% 50%,rgb(58, 58, 58), black)
+
+}
+
+.bg-cover {
     background-attachment: static;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;   
-    min-height: 100vh;
+    min-height: 100vh;    
+    margin-bottom: 0;
 }
 .favourite{
   background-color:green;
@@ -57,7 +94,11 @@ body {
 }
 
 .win-col{
-  border: 1px dashed green;
+  border: 2px dashed green;
   margin-bottom: 3vw;
+  border-radius: 10px;
   width: 60%;
 }
+
+
+

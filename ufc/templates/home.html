@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
-<!-- Background Image-->
-<div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/mcgregor_money_floyd.jpg"%})">
+<!-- Background Image -->
+<div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/mcgregor_money_floyd.jpg"%})" width:'100%'>
 
 <div class="row blank-row">
 </div>
@@ -21,15 +21,15 @@
     <!-- Stats to be added  -->
     {% for stat in stats %}
         <div class="col-lg-3" align="center">
-            <h2> Accuracy {{stat.accuracy}}%</h2>
+            <h2> Accuracy {{stat.accuracy|floatformat}}%</h2>
             <p>The historical accuracy of our model. We expect for every 100 fights we make a prediction for 72 of them will be correct</p>
         </div>
         <div class="col-lg-3" align="center">
-            <h2> Return on Investment {{stat.ROI}}%</h2>
+            <h2> Return on Investment {{stat.ROI|floatformat}}%</h2>
             <p>Our Model was optimized for profit instead of accuracy as favourites don't make money. For the year of 2020, the return on our investments has been 250%. So, if you started with 100 dollars in January, you would now have 250 dollars</p>
         </div>
         <div class="col-lg-3" align="center">
-            <h2> Fights Analyzed {{stat.fights_analyzed}}</h2>
+            <h2> Fights Analyzed {{stat.fights_analyzed|floatformat:"-3g"}}</h2>
             <p>Our Machine Learning Model has been trained on all the historical UFC fights. The model uses a combination of statistical metrics for each fighter along with the market odds to make it's decision</p>
         </div>
     </div>
