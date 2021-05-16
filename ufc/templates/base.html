@@ -14,7 +14,9 @@
 
 <body>
     <header>
-      <!-- Fixed navbar -->
+
+
+      {% comment %} <!-- Fixed navbar -->
         <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4\
      bg-white border-bottom shadow-sm">
             <a href="/" class="navbar-brand my-0 mr-md-auto font-weight-normal"
@@ -49,10 +51,10 @@
       {% endif %}
     </ul>
             </nav>
-        </div> 
+        </div>  {% endcomment %}
     </header>
     <div class="container-fluid my-container" >
-        {% spaceless %}
+      {% spaceless %}
     {% block content %}
     {% endblock content %}
     {% endspaceless %}

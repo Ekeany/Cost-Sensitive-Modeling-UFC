@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-
 <!-- Background Image -->
 <div class="jumbotron bg-cover text-white" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url({% static "images/octagon_image.jpg"%})">
-
+<a href="/"><h2 class="text-success">Home</h2></a>
 <!-- Upcoming Events and Stats -->
 {% for event in futureEvent %}
     <div class="row justify-content-center my-row">
@@ -39,7 +38,34 @@
                 {% endif %}
                     <p>{{fight.red_fighter_pred}} % chance of winning</p>
             </div>
-            {% else %}
+            {% elif fight.predicted_winner == 0 %}
+            <div class="col-lg-4 event-col">
+                <h2>{{fight.red_fighter_name}}</h2>
+                    <!-- Colorizing -->
+                {% if fight.blue_fighter_odds < fight.red_fighter_odds%}
+                    <div class="favourite"><h4>{{fight.red_fighter_odds}} Favourite</h4></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h4>{{fight.red_fighter_odds}} Even</h4></div>
+                {% else %} 
+                    <div class="underdog"><h4>{{fight.red_fighter_odds}} Underdog</h4></div>
+                {% endif %}
+                    <p>{{fight.red_fighter_pred}} % chance of winning</p>
+            </div>
+             {% elif fight.predicted_winner == 0.5 %}
+            <div class="col-lg-4 draw-col">
+            <p class="text-warning"><b>Predicted Draw</b></p>
+                <h2>{{fight.red_fighter_name}}</h2>
+                    <!-- Colorizing -->
+                {% if fight.blue_fighter_odds < fight.red_fighter_odds%}
+                    <div class="favourite"><h4>{{fight.red_fighter_odds}} Favourite</h4></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h4>{{fight.red_fighter_odds}} Even</h4></div>
+                {% else %} 
+                    <div class="underdog"><h4>{{fight.red_fighter_odds}} Underdog</h4></div>
+                {% endif %}
+                    <p>{{fight.red_fighter_pred}} % chance of winning</p>
+            </div>
+             {% else %}
             <div class="col-lg-4 event-col">
                 <h2>{{fight.red_fighter_name}}</h2>
                     <!-- Colorizing -->
@@ -71,9 +97,36 @@
                 {% endif %}
                     <p> {{fight.blue_fighter_pred}}% chance of winning</p>
             </div>
-            {% else %}
+            {% elif fight.predicted_winner == 1 %}
                 <div class="col-lg-4 event-col">
                     <h2>{{fight.blue_fighter_name}}</h2>
+                <!-- Colorizing -->
+                {% if fight.blue_fighter_odds > fight.red_fighter_odds%}
+                    <div class="favourite"><h4>{{fight.blue_fighter_odds}} Favourite</h4></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h4>{{fight.blue_fighter_odds}} Even </h4></div>
+                {% else %} 
+                    <div class="underdog"><h4>{{fight.blue_fighter_odds}} Underdog</h4></div>
+                {% endif %}
+                    <p>{{fight.blue_fighter_pred}}% chance of winning</p>
+            </div>
+            {% elif fight.predicted_winner == 0.5 %}
+                <div class="col-lg-4 draw-col">
+                <p class="text-warning"><b>Predicted Draw</b></p>
+                    <h2>{{fight.blue_fighter_name}}</h2>
+                <!-- Colorizing -->
+                {% if fight.blue_fighter_odds > fight.red_fighter_odds%}
+                    <div class="favourite"><h4>{{fight.blue_fighter_odds}} Favourite</h4></div>
+                {% elif fight.blue_fighter_odds == fight.red_fighter_odds%}
+                    <div class="even"><h4>{{fight.blue_fighter_odds}} Even </h4></div>
+                {% else %} 
+                    <div class="underdog"><h4>{{fight.blue_fighter_odds}} Underdog</h4></div>
+                {% endif %}
+                    <p>{{fight.blue_fighter_pred}}% chance of winning</p>
+            </div>
+            {% else %}
+               <div class="col-lg-4 event-col">
+                <h2>{{fight.blue_fighter_name}}</h2>
                 <!-- Colorizing -->
                 {% if fight.blue_fighter_odds > fight.red_fighter_odds%}
                     <div class="favourite"><h4>{{fight.blue_fighter_odds}} Favourite</h4></div>
@@ -87,7 +140,7 @@
             {% endif %}
             <div class="col-lg-12" align="center">
              <!-- if statement to show  -->
-             {% if fight.prediction_made == False%}
+             {% if fight.prediction_made == False %}
                 <div class="even"><h4>Predictions will be made after the weigh ins !</h4></div>
             {% endif %}
             </div>

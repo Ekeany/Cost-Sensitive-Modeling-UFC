@@ -73,21 +73,21 @@ body {
 }
 .favourite{
   background-color:green;
-  width: 60%;
+  width: 75%;
   border-radius: 10px;
   border: 0.2px solid white;
   margin-bottom: 1vw;
 }
 .underdog{
   background-color:red;
-  width: 60%;
+  width: 75%;
   border-radius: 10px;
   border: 0.2px solid white;
   margin-bottom: 1vw;
 }
 .even{
   background-color:purple;
-  width: 60%;
+  width: 75%;
   border-radius: 10px;
   border: 0.2px solid white;
   margin-bottom: 1vw;
@@ -99,6 +99,11 @@ body {
   border-radius: 10px;
   width: 60%;
 }
-
+.draw-col{
+  border: 2px dashed yellow;
+  margin-bottom: 3vw;
+  border-radius: 10px;
+  width: 60%;
+}
 
 
