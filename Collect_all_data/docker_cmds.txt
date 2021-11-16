@@ -1,0 +1,8 @@
+docker build -t <image_name>:latest .
+docker build -t download_fight_data:latest .
+docker build -t download_odds:latest .
+
+
+docker run -v C:/Users/Folder:/app <image_name>:latest
+docker run -v C:/Users/egnke/PythonCode/The_UFC/Cost-Sensitive-Modeling-UFC/Collect_all_data/FightData:/app download_fight_data:latest 
+docker run -v C:/Users/egnke/PythonCode/The_UFC/Cost-Sensitive-Modeling-UFC/Collect_all_data/Odds:/app download_odds:latest
